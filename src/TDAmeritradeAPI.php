@@ -3,8 +3,11 @@
 namespace MichaelDrennen\TDAmeritradeAPI;
 
 use GuzzleHttp\Client;
+use Symfony\Component\DomCrawler\Crawler;
 
 class TDAmeritradeAPI {
+
+    const BASE_URI = 'https://auth.tdameritrade.com';
 
     /**
      * @var string The consumer key for your TD Ameritrade API app.
@@ -49,24 +52,47 @@ class TDAmeritradeAPI {
             'allow_redirects' => [
                 'strict' => TRUE,
             ],
-            'base_uri'        => 'https://auth.tdameritrade.com',
+            'base_uri'        => self::BASE_URI,
             'headers'         => $headers ];
         return new Client( $options );
     }
 
 
     /**
+     * @return string
      * @throws \GuzzleHttp\Exception\GuzzleException
-     * https://auth.tdameritrade.com/auth?response_type=code&redirect_uri={Callback URL}&client_id={Consumer Key}@AMER.OAUTHAP
      */
     public function authenticate() {
-        $html = $this->getHtmlFromAmeritradeLoginPage();
-        $inputs = $this->getInputsFromAmeritradeLoginPage($html);
+        $html       = $this->getHtmlFromAmeritradeLoginPage();
+        $formAction = $this->getFormActionFromAmeritradeLoginPage( $html );
+        $inputs     = $this->getInputsFromAmeritradeLoginPage( $html );
+        $inputs     = $this->addAdditionalFieldsToInputs( $inputs );
+        //print_r( $inputs );
 
+
+
+        $options = [
+            'form_params' => $inputs,
+            'query'       => [
+                'response_type' => 'code',
+                'redirect_uri'  => $this->callbackUrl,
+                'client_id'     => $this->oauthConsumerKey . '@AMER.OAUTHAP',
+            ],
+        ];
+
+
+
+        $response = $this->guzzle->request( 'POST', $formAction, $options );
+        $body     = $response->getBody();
+        $contents = $body->getContents();
+
+        var_dump( $contents );
+
+        return $contents;
 
     }
 
-    protected function getHtmlFromAmeritradeLoginPage(){
+    protected function getHtmlFromAmeritradeLoginPage() {
         $url = '/auth';
 
         $options = [
@@ -84,14 +110,53 @@ class TDAmeritradeAPI {
         return $contents;
     }
 
-    protected function getInputsFromAmeritradeLoginPage(string $htmlOfLoginPage){
-        var_dump($htmlOfLoginPage);
-        $dom = new \DOMDocument();
-        $dom->loadHTML($htmlOfLoginPage);
-        $inputs = $dom->getElementsByTagName('input');
-        foreach ($inputs as $input):
-            var_dump($input);
+
+    /**
+     * @param string $htmlOfLoginPage
+     * @return string
+     * @throws \Exception
+     */
+    protected function getFormActionFromAmeritradeLoginPage( string $htmlOfLoginPage ): string {
+        $crawler = new Crawler( $htmlOfLoginPage );
+        $crawler = $crawler->filter( 'form' );
+        foreach ( $crawler as $domElenment ):
+            return $domElenment->getAttribute( 'action' );
         endforeach;
+        throw new \Exception( "Form action not found on Ameritrade Login Page" );
+    }
+
+
+    //
+    protected function getInputsFromAmeritradeLoginPage( string $htmlOfLoginPage ): array {
+        $inputs  = [];
+        $crawler = new Crawler( $htmlOfLoginPage );
+        $crawler = $crawler->filter( 'input' );
+        foreach ( $crawler as $domElement ):
+            $inputs[ $domElement->getAttribute( 'name' ) ] = $domElement->getAttribute( 'value' );
+        endforeach;
+
         return $inputs;
     }
+
+    protected function addAdditionalFieldsToInputs( array $inputs ): array {
+        $inputs[ 'su_username' ] = $this->userName;
+        $inputs[ 'su_password' ] = $this->password;
+
+        /**
+         * The device signature
+         */
+//        $inputs[ 'fp_cfp' ]         = getenv( 'TDAMERITRADE_FP_CFP' );
+//        $inputs[ 'fp_fp2DeviceId' ] = getenv( 'TDAMERITRADE_FP_FP2_DEVICE_ID' );
+//        $inputs[ 'fp_browser' ]     = getenv( 'TDAMERITRADE_FP_BROWSER' );
+//        $inputs[ 'fp_screen' ]      = getenv( 'TDAMERITRADE_FP_SCREEN' );
+//        $inputs[ 'fp_timezone' ]    = getenv( 'TDAMERITRADE_FP_TIMEZONE' );
+//        $inputs[ 'fp_language' ]    = getenv( 'TDAMERITRADE_FP_LANGUAGE' );
+//        $inputs[ 'fp_java' ]        = getenv( 'TDAMERITRADE_FP_JAVA' );
+//        $inputs[ 'fp_cookie' ]      = getenv( 'TDAMERITRADE_FP_COOKIE' );
+
+        $inputs = array_filter( $inputs );
+
+        return $inputs;
+    }
+
 }
