@@ -21,11 +21,20 @@
         </whitelist>
     </filter>
     <php>
-        <env name="TDAMERITRADE_OAUTH_CONSUMER_KEY" value="keyFromTDAmeritrade"/>
+        <env name="CHROME_PATH" value="/Applications/Chromium.app/Contents/MacOS/Chromium"/>
+        <env name="TDAMERITRADE_CALLBACK_URL" value="https://your-project.com/callback"/>
+        <env name="TDAMERITRADE_OAUTH_CONSUMER_KEY" value="SOMEKEYFROMTDAMERITRADE"/>
         <env name="TDAMERITRADE_CONSUMER_SECRET" value=""/>
-        <env name="TDAMERITRADE_USERNAME" value=""/>
-        <env name="TDAMERITRADE_PASSWORD" value=""/>
-        <env name="TDAMERITRADE_CALLBACK_URL" value="https://your-domain.blah/callback"/>
+        <env name="TDAMERITRADE_USERNAME" value="tdameritradeuseraccount"/>
+        <env name="TDAMERITRADE_PASSWORD" value="whateveryourpasswordis"/>
+        <env name="TDAMERITRADE_QUESTION_1" value="What is your blah blah?"/>
+        <env name="TDAMERITRADE_ANSWER_1" value="answer1"/>
+        <env name="TDAMERITRADE_QUESTION_2" value="What is the blah blah?"/>
+        <env name="TDAMERITRADE_ANSWER_2" value="answer2"/>
+        <env name="TDAMERITRADE_QUESTION_3" value="What was the yada yada?"/>
+        <env name="TDAMERITRADE_ANSWER_3" value="answer3"/>
+        <env name="TDAMERITRADE_QUESTION_4" value="What was the name some such?"/>
+        <env name="TDAMERITRADE_ANSWER_4" value="answer4"/>
     </php>
 
     <logging>
