@@ -2,18 +2,21 @@
 
 namespace MichaelDrennen\TDAmeritradeAPI;
 
-use GuzzleHttp\Client;
+
+use MichaelDrennen\TDAmeritradeAPI\Exceptions\BaseClientException;
+use MichaelDrennen\TDAmeritradeAPI\Exceptions\BaseServerException;
+use MichaelDrennen\TDAmeritradeAPI\Exceptions\ClientExceptionFactory;
+use MichaelDrennen\TDAmeritradeAPI\Responses\SecuritiesAccount;
+use MichaelDrennen\TDAmeritradeAPI\Responses\SecuritiesAccounts;
+use GuzzleHttp\RequestOptions;
+use MichaelDrennen\TDAmeritradeAPI\Traits\QuotesTrait;
 
 class TDAmeritradeAPI {
 
-    const BASE_URI = 'https://auth.tdameritrade.com';
+    use APIClientTrait;
+    use QuotesTrait;
 
-    protected $code;
-
-    /**
-     * @var \GuzzleHttp\Client
-     */
-    protected $guzzle;
+    protected $token;
 
     public function __construct( string $oauthConsumerKey,
                                  string $userName,
@@ -41,33 +44,227 @@ class TDAmeritradeAPI {
                                             $question4,
                                             $answer4 );
 
-        $this->code = $authenticator->authenticate();
+        $this->token = $authenticator->authenticate();
 
-        $this->guzzle = $this->createGuzzleClient();
+        $this->guzzle = $this->createGuzzleClient( $this->token );
 
     }
 
     /**
-     * A simple accessor method to get the authentication code from TD Ameritrade.
+     * A simple accessor method to return the authentication token from TD Ameritrade.
      * @return string
      */
-    public function getCode(): string {
-        return $this->code;
+    public function getToken(): string {
+        return $this->token;
     }
 
+
     /**
-     * @param string|NULL $token
-     * @return \GuzzleHttp\Client
+     * @return SecuritiesAccounts
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * https://api.tdameritrade.com/v1/accounts
      */
-    protected function createGuzzleClient(): Client {
-        $headers                    = [];
-        $headers[ 'Accept' ]        = 'application/json';
-        $headers[ 'Authorization' ] = 'Bearer ' . $this->code;
-        $options                    = [
-            'base_uri' => self::BASE_URI,
-            'headers'  => $headers,
+    public function getAccounts(): SecuritiesAccounts {
+        $uri      = 'v1/accounts';
+        $options  = [];
+        $response = $this->guzzle->request( 'GET', $uri, $options );
+        $body     = $response->getBody();
+        $json     = json_decode( $body, TRUE );
+
+        return new SecuritiesAccounts( $json );
+    }
+
+
+    /**
+     * @param string $accountId
+     * @return SecuritiesAccount
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * https://api.tdameritrade.com/v1/accounts
+     */
+    public function getAccount( string $accountId ): SecuritiesAccount {
+        $uri      = 'v1/accounts/' . $accountId;
+        $options  = [];
+        $response = $this->guzzle->request( 'GET', $uri, $options );
+        $body     = $response->getBody();
+        $json     = json_decode( $body, TRUE );
+
+        return new SecuritiesAccount( $json[ 'securitiesAccount' ] );
+    }
+
+
+
+
+    /**
+     * TODO build out and test.
+     * @param string $accountId
+     * @param string $ticker
+     * @param int $quantity
+     * @return bool
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Exception
+     */
+    public function createSavedBuyMarketOrder( string $accountId, string $ticker, int $quantity ) {
+        $uri        = 'v1/accounts/' . $accountId . '/savedorders';
+        $orderArray = [
+            'orderType'          => 'MARKET',
+            'session'            => 'NORMAL',
+            'duration'           => 'DAY',
+            'orderStrategyType'  => 'SINGLE',
+            'orderLegCollection' => [ [
+                                          'orderLegType' => 'EQUITY',
+                                          'instruction'  => 'BUY',
+                                          'quantity'     => $quantity,
+                                          'quantityType' => 'SHARES',
+                                          'instrument'   => [
+                                              'symbol'    => $ticker,
+                                              'assetType' => 'EQUITY',
+                                          ] ],
+            ],
         ];
-        return new Client( $options );
+
+        try {
+            $this->guzzle->request( 'POST', $uri, [ RequestOptions::JSON => $orderArray ] );
+            return TRUE;
+        } catch ( \Exception $exception ) {
+            throw $exception;
+        }
+    }
+
+
+    /**
+     * @param string $accountId
+     * @param string $ticker
+     * @param int $quantity
+     * @param string $quantityType Ex: SHARES or DOLLARS or ALL_SHARES
+     * @param string $orderType Ex: MARKET
+     * @param string $instruction Ex: BUY
+     * @return bool
+     * @throws BaseClientException
+     * @throws BaseServerException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @see https://developer.tdameritrade.com/account-access/apis/post/accounts/%7BaccountId%7D/orders-0
+     * @see https://developer.tdameritrade.com/content/place-order-samples
+     * @see http://docs.guzzlephp.org/en/latest/request-options.html#json
+     */
+    public function placeOrder( string $accountId, string $ticker, int $quantity, string $quantityType, string $orderType, string $instruction ): bool {
+        $uri        = 'v1/accounts/' . $accountId . '/orders';
+        $orderArray = [
+            'orderType'          => $orderType,
+            'session'            => 'NORMAL',
+            'duration'           => 'DAY',
+            'orderStrategyType'  => 'SINGLE',
+            'orderLegCollection' => [ [
+                                          'orderLegType' => 'EQUITY',
+                                          'instruction'  => $instruction,
+                                          'quantity'     => $quantity,
+                                          'quantityType' => 'SHARES',
+                                          'instrument'   => [
+                                              'symbol'    => $ticker,
+                                              'assetType' => 'EQUITY',
+                                          ] ],
+            ],
+        ];
+
+        try {
+            $this->guzzle->request( 'POST', $uri, [ RequestOptions::JSON => $orderArray ] );
+            return TRUE;
+        } catch ( \GuzzleHttp\Exception\ClientException $exception ) {
+            throw ClientExceptionFactory::create( $exception, [
+                'ticker'   => $ticker,
+                'quantity' => $quantity,
+            ] );
+        } catch ( \GuzzleHttp\Exception\ServerException $exception ) {
+            throw new BaseServerException( $exception->getMessage(), $exception->getCode(), $exception, [
+                'ticker'   => $ticker,
+                'quantity' => $quantity,
+            ] );
+        } catch ( \Exception $exception ) {
+            throw $exception;
+        }
+    }
+
+
+    /**
+     * @param string $accountId
+     * @param string $ticker
+     * @param int $quantity
+     * @return boolean
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Exception
+     */
+    public function buyStockSharesMarketPrice( string $accountId, string $ticker, int $quantity ): bool {
+        return $this->placeOrder( $accountId,
+                                  $ticker,
+                                  $quantity,
+                                  'SHARES',
+                                  'MARKET',
+                                  'BUY' );
+    }
+
+
+    /**
+     * @param string $accountId
+     * @param string $ticker
+     * @param int $quantity
+     * @return bool
+     * @throws BaseClientException
+     * @throws BaseServerException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function sellStockSharesMarketPrice( string $accountId, string $ticker, int $quantity ): bool {
+        return $this->placeOrder( $accountId,
+                                  $ticker,
+                                  $quantity,
+                                  'SHARES',
+                                  'MARKET',
+                                  'SELL' );
+    }
+
+
+    /**
+     * TODO Waiting to hear back from their tech support.
+     * @param string $accountId
+     * @param string $ticker
+     * @return bool
+     * @throws BaseClientException
+     * @throws BaseServerException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function sellStockAllSharesMarketPrice( string $accountId, string $ticker ): bool {
+        $uri        = 'v1/accounts/' . $accountId . '/orders';
+        $orderArray = [
+            'orderType'          => 'MARKET',
+            'session'            => 'NORMAL',
+            'duration'           => 'DAY',
+            'orderStrategyType'  => 'SINGLE',
+            'orderLegCollection' => [ [
+                                          'orderLegType' => 'EQUITY',
+                                          'instruction'  => 'SELL',
+                                          //                                          'quantity'     => 100000000,
+                                          'quantityType' => 'ALL_SHARES',
+                                          'instrument'   => [
+                                              'symbol'    => $ticker,
+                                              'assetType' => 'EQUITY',
+                                          ] ],
+            ],
+        ];
+
+        try {
+            $this->guzzle->request( 'POST', $uri, [ RequestOptions::JSON => $orderArray ] );
+            return TRUE;
+        } catch ( \GuzzleHttp\Exception\ClientException $exception ) {
+            throw ClientExceptionFactory::create( $exception, [
+                'ticker'   => $ticker,
+                'quantity' => 'ALL SHARES',
+            ] );
+        } catch ( \GuzzleHttp\Exception\ServerException $exception ) {
+            throw new BaseServerException( $exception->getMessage(), $exception->getCode(), $exception, [
+                'ticker'   => $ticker,
+                'quantity' => 'ALL SHARES',
+            ] );
+        } catch ( \Exception $exception ) {
+            throw $exception;
+        }
     }
 
 }

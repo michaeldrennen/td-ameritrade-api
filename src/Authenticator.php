@@ -10,7 +10,10 @@ use Exception;
 
 class Authenticator {
 
-    const BASE_URI = 'https://auth.tdameritrade.com';
+    use APIClientTrait;
+
+    const AUTH_URI = 'https://auth.tdameritrade.com/';
+
 
     /**
      * @var string The consumer key for your TD Ameritrade API app.
@@ -70,7 +73,7 @@ class Authenticator {
         // starts headless chrome
         $browser = $browserFactory->createBrowser( [
                                                        'headless'        => TRUE,         // disable headless mode
-                                                       'connectionDelay' => 0.5,           // add 0.8 second of delay between each instruction sent to chrome,
+                                                       'connectionDelay' => 0.8,           // add 0.8 second of delay between each instruction sent to chrome,
                                                        //'debugLogger'     => 'php://stdout' // will enable verbose mode
                                                    ]
         );
@@ -91,17 +94,20 @@ class Authenticator {
 
         if ( $this->textChallengePresented( $postLoginPageInnerHTML ) ):
             $code = $this->processTextChallenge( $page );
-            return $code;
+        else:
+            $page->evaluate( 'console.log("Text challenge NOT presented")' );
+
+            $code = $this->clickTheAllowButtonAndReturnTheCode( $page );
         endif;
 
-        $page->evaluate( 'console.log("Text challenge NOT presented")' );
 
-        return $this->clickTheAllowButtonAndReturnTheCode( $page );
+        $token = $this->getTokenFromCode( $code );
 
+        return $token;
     }
 
     protected function getLoginUrl( string $callbackUri, string $oauthConsumerKey ) {
-        return 'https://auth.tdameritrade.com/auth?response_type=code&redirect_uri=' . $callbackUri . '&client_id=' . $oauthConsumerKey . '@AMER.OAUTHAP';
+        return self::AUTH_URI . 'auth?response_type=code&redirect_uri=' . $callbackUri . '&client_id=' . $oauthConsumerKey . '@AMER.OAUTHAP';
     }
 
 
@@ -120,7 +126,7 @@ class Authenticator {
 
     /**
      * @param Page $page
-     * @return array
+     * @return string
      * @throws NavigationExpired
      * @throws OperationTimedOut
      * @throws \HeadlessChromium\Exception\CommunicationException
@@ -199,6 +205,14 @@ class Authenticator {
     }
 
 
+    /**
+     * @param Page $page
+     * @return string
+     * @throws NavigationExpired
+     * @throws OperationTimedOut
+     * @throws \HeadlessChromium\Exception\CommunicationException
+     * @throws \HeadlessChromium\Exception\EvaluationFailed
+     */
     protected function clickTheAllowButtonAndReturnTheCode( Page &$page ): string {
         try {
             $evaluation = $page->evaluate( "document.querySelector('#accept').click();" );
@@ -215,9 +229,40 @@ class Authenticator {
         }
 
         $jsonString = $page->evaluate( 'document.body.innerText' )->getReturnValue();
-        $json = \GuzzleHttp\json_decode( $jsonString, TRUE );
+        $json       = \GuzzleHttp\json_decode( $jsonString, TRUE );
 
         return (string)$json[ 'code' ];
+    }
+
+
+    /**
+     * @param string $code
+     * @return string
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @see https://developer.tdameritrade.com/authentication/apis/post/token-0
+     */
+    protected function getTokenFromCode( string $code ): string {
+
+        $guzzle = $this->createGuzzleClient();
+
+        // https://api.tdameritrade.com/v1/oauth2/token
+        $uri = 'v1/oauth2/token';
+
+        $options  = [
+
+            'form_params' => [
+                'grant_type'   => 'authorization_code',
+                'code'         => $code,
+                'client_id'    => $this->oauthConsumerKey,
+                'redirect_uri' => $this->callbackUrl,
+            ],
+        ];
+        $response = $guzzle->request( 'POST', $uri, $options );
+        $body     = $response->getBody();
+
+        $json = \GuzzleHttp\json_decode( $body, TRUE );
+
+        return $json[ 'access_token' ];
     }
 
 }

@@ -2,6 +2,7 @@
 
 namespace MichaelDrennen\TDAmeritrade\Tests;
 
+use MichaelDrennen\TDAmeritradeAPI\Responses\Qutoes\Quote;
 use MichaelDrennen\TDAmeritradeAPI\TDAmeritradeAPI;
 use PHPUnit\Framework\TestCase;
 
@@ -43,11 +44,27 @@ class TDAmeritradeTest extends TestCase {
      * @test
      */
     public function constructorShouldCreateInstance() {
+
+        $accountId    = getenv( 'TDAMERITRADE_ACCOUNT_ID' );
         $tdAmeritrade = $this->getTDAmeritradeAPIInstance();
         $this->assertInstanceOf( TDAmeritradeAPI::class, $tdAmeritrade );
-        $code = $tdAmeritrade->getCode();
+        $code = $tdAmeritrade->getToken();
         $this->assertNotEmpty( $code );
 
+//        $securitiesAccounts = $tdAmeritrade->getAccounts();
+//        $this->assertInstanceOf( SecuritiesAccounts::class, $securitiesAccounts );
+//
+//        $securitiesAccount = $tdAmeritrade->getAccount( $accountId );
+//        $this->assertInstanceOf( SecuritiesAccount::class, $securitiesAccount );
+
+
+        //$tdAmeritrade->buyStockMarketPrice( $accountId, 'LODE', 1 );
+//        $tdAmeritrade->sellStockMarketPrice( $accountId, 'LODE', 1 );
+//        $tdAmeritrade->sellStockAllSharesMarketPrice( $accountId, 'LODE' );
+        //$tdAmeritrade->createSavedBuyMarketOrder( $accountId, 'LODE', 1 );
+
+        $quote = $tdAmeritrade->getStockQuote( 'LODE' );
+        $this->assertInstanceOf( Quote::class, $quote );
     }
 
 }

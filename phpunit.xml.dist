@@ -35,6 +35,8 @@
         <env name="TDAMERITRADE_ANSWER_3" value="answer3"/>
         <env name="TDAMERITRADE_QUESTION_4" value="What was the name some such?"/>
         <env name="TDAMERITRADE_ANSWER_4" value="answer4"/>
+
+        <env name="TDAMERITRADE_ACCOUNT_ID" value="123456789"/>
     </php>
 
     <logging>
