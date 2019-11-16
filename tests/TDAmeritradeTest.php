@@ -2,6 +2,7 @@
 
 namespace MichaelDrennen\TDAmeritrade\Tests;
 
+use Carbon\Carbon;
 use MichaelDrennen\TDAmeritradeAPI\Responses\Qutoes\Quote;
 use MichaelDrennen\TDAmeritradeAPI\TDAmeritradeAPI;
 use PHPUnit\Framework\TestCase;
@@ -65,6 +66,12 @@ class TDAmeritradeTest extends TestCase {
 
         $quote = $tdAmeritrade->getStockQuote( 'LODE' );
         $this->assertInstanceOf( Quote::class, $quote );
+
+
+        //$date        = Carbon::create( 2019, 11, 14, 12, 0, 0, 'America/New_York' );
+        $date        = Carbon::now( 'America/New_York' )->addMonth();
+        $marketHours = $tdAmeritrade->getEquityMarketHours( $date );
+        print_r( $marketHours );
     }
 
 }

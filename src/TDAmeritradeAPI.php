@@ -9,12 +9,14 @@ use MichaelDrennen\TDAmeritradeAPI\Exceptions\ClientExceptionFactory;
 use MichaelDrennen\TDAmeritradeAPI\Responses\SecuritiesAccount;
 use MichaelDrennen\TDAmeritradeAPI\Responses\SecuritiesAccounts;
 use GuzzleHttp\RequestOptions;
+use MichaelDrennen\TDAmeritradeAPI\Traits\MarketHoursTrait;
 use MichaelDrennen\TDAmeritradeAPI\Traits\QuotesTrait;
 
 class TDAmeritradeAPI {
 
     use APIClientTrait;
     use QuotesTrait;
+    use MarketHoursTrait;
 
     protected $token;
 
