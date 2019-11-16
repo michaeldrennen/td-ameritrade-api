@@ -17,9 +17,10 @@ trait APIClientTrait {
 
     /**
      * @param string|NULL $token
+     * @param bool $debug
      * @return Client
      */
-    protected function createGuzzleClient( string $token = NULL ): Client {
+    protected function createGuzzleClient( string $token = NULL, bool $debug = FALSE ): Client {
         $headers             = [];
         $headers[ 'Accept' ] = 'application/json';
 
@@ -31,7 +32,7 @@ trait APIClientTrait {
         $options = [
             'base_uri' => $this->baseURI,
             'headers'  => $headers,
-            'debug'    => TRUE,
+            'debug'    => $debug,
         ];
         return new Client( $options );
     }

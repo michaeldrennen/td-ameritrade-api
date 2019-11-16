@@ -29,7 +29,8 @@ class TDAmeritradeAPI {
                                  string $question3,
                                  string $answer3,
                                  string $question4,
-                                 string $answer4 ) {
+                                 string $answer4,
+                                 bool $debug = FALSE ) {
 
         $authenticator = new Authenticator( $oauthConsumerKey,
                                             $userName,
@@ -46,7 +47,7 @@ class TDAmeritradeAPI {
 
         $this->token = $authenticator->authenticate();
 
-        $this->guzzle = $this->createGuzzleClient( $this->token );
+        $this->guzzle = $this->createGuzzleClient( $this->token, $debug );
 
     }
 
@@ -90,8 +91,6 @@ class TDAmeritradeAPI {
 
         return new SecuritiesAccount( $json[ 'securitiesAccount' ] );
     }
-
-
 
 
     /**
