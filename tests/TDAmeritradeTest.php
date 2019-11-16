@@ -69,7 +69,7 @@ class TDAmeritradeTest extends TestCase {
 
 
         //$date        = Carbon::create( 2019, 11, 14, 12, 0, 0, 'America/New_York' );
-        $date        = Carbon::now( 'America/New_York' )->addMonth();
+        $date        = Carbon::now( 'America/New_York' )->addMonth()->setHour(20);
         $marketHours = $tdAmeritrade->getEquityMarketHours( $date );
         print_r( $marketHours );
     }

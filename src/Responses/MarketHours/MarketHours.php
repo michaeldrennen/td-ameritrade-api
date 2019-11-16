@@ -84,4 +84,45 @@ class MarketHours {
         endif;
     }
 
+    public function isTradingDay(): bool {
+        return $this->isOpen;
+    }
+
+
+    /**
+     * @return bool
+     * @throws \Exception
+     */
+    public function marketIsOpen(): bool {
+        if ( FALSE == $this->isOpen ):
+            return FALSE;
+        endif;
+
+        $now = Carbon::now( "America/New_York" );
+
+        $nowUnix = $now->copy()->timestamp;
+
+        if ( !isset( $this->sessionHours[ 'regularMarket' ][ 'start' ] ) ):
+            throw new \Exception( "Unable to determine if market is open because regular market start time not set." );
+        endif;
+
+        if ( !isset( $this->sessionHours[ 'regularMarket' ][ 'end' ] ) ):
+            throw new \Exception( "Unable to determine if market is open because regular market end time not set." );
+        endif;
+
+
+        $openUnix  = $this->sessionHours[ 'regularMarket' ][ 'start' ]->copy()->timestamp;
+        $closeUnix = $this->sessionHours[ 'regularMarket' ][ 'end' ]->copy()->timestamp;
+
+        if ( $nowUnix < $openUnix ):
+            return FALSE;
+        endif;
+
+        if ( $nowUnix > $closeUnix ):
+            return FALSE;
+        endif;
+
+        return TRUE;
+    }
+
 }
