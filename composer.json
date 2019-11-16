@@ -20,7 +20,7 @@
       "email": "michaeldrennen74@gmail.com"
     }
   ],
-  "minimum-stability": "stable",
+  "minimum-stability": "dev",
   "autoload": {
     "psr-4": {
       "MichaelDrennen\\TDAmeritradeAPI\\": "src"
