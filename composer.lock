@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c2ccbd8574f1c82073bed8549e6659da",
+    "content-hash": "cf0be11951474780fa0160698cd90321",
     "packages": [
         {
             "name": "apix/log",
@@ -344,6 +344,45 @@
                 "url"
             ],
             "time": "2019-07-01T23:21:34+00:00"
+        },
+        {
+            "name": "michaeldrennen/calendar",
+            "version": "v0.04",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/michaeldrennen/Calendar.git",
+                "reference": "79d28bd4d10f9a1e853d650436a6cd2824a2c50f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/michaeldrennen/Calendar/zipball/79d28bd4d10f9a1e853d650436a6cd2824a2c50f",
+                "reference": "79d28bd4d10f9a1e853d650436a6cd2824a2c50f",
+                "shasum": ""
+            },
+            "require": {
+                "nesbot/carbon": "^2.23"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^8.3"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "MichaelDrennen\\Calendar\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "michaeldrennen",
+                    "email": "michaeldrennen74@gmail.com"
+                }
+            ],
+            "description": "A PHP library to help querying dates.",
+            "time": "2019-09-03T06:12:59+00:00"
         },
         {
             "name": "nesbot/carbon",

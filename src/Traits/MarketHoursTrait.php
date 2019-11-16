@@ -4,6 +4,7 @@ namespace MichaelDrennen\TDAmeritradeAPI\Traits;
 
 
 use Carbon\Carbon;
+use MichaelDrennen\Calendar\Calendar;
 use MichaelDrennen\TDAmeritradeAPI\Responses\MarketHours;
 
 trait MarketHoursTrait {
@@ -48,6 +49,13 @@ trait MarketHoursTrait {
             return new MarketHours( $json[ 'equity' ][ 'equity' ] );
         endif;
         throw new \Exception( "Take a look at the JSON returned from their API. I'm seeing a new index in the array." );
+    }
+
+    public function getNextMarketHours(): MarketHours {
+        $now            = Carbon::now( 'America/New_York' );
+        $nextMarketOpen = Calendar::getNextUSMarketOpen( $now );
+        return $this->getEquityMarketHours( $nextMarketOpen );
+
     }
 
 }
