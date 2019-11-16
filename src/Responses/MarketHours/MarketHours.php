@@ -62,7 +62,7 @@ class MarketHours {
 
     }
 
-    protected function setSessionHours( array $sessionHours = [] ) {
+    protected function setSessionHours( array $sessionHours = NULL ) {
         if ( empty( $sessionHours ) ):
             $this->sessionHours = NULL;
         endif;
