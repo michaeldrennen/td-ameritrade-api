@@ -3,6 +3,7 @@
 namespace MichaelDrennen\TDAmeritrade\Tests;
 
 use Carbon\Carbon;
+use MichaelDrennen\TDAmeritradeAPI\Authenticator;
 use MichaelDrennen\TDAmeritradeAPI\Responses\Qutoes\Quote;
 use MichaelDrennen\TDAmeritradeAPI\TDAmeritradeAPI;
 use PHPUnit\Framework\TestCase;
@@ -27,18 +28,21 @@ class TDAmeritradeTest extends TestCase {
         $question_4       = getenv( 'TDAMERITRADE_QUESTION_4' );
         $answer_4         = getenv( 'TDAMERITRADE_ANSWER_4' );
 
-        return new TDAmeritradeAPI( $oauthConsumerKey,
-                                    $userName,
-                                    $password,
-                                    $callbackUrl,
-                                    $question_1,
-                                    $answer_1,
-                                    $question_2,
-                                    $answer_2,
-                                    $question_3,
-                                    $answer_3,
-                                    $question_4,
-                                    $answer_4 );
+        $authenticator = new Authenticator($oauthConsumerKey,
+                                           $userName,
+                                           $password,
+                                           $callbackUrl,
+                                           $question_1,
+                                           $answer_1,
+                                           $question_2,
+                                           $answer_2,
+                                           $question_3,
+                                           $answer_3,
+                                           $question_4,
+                                           $answer_4);
+        $tdAmeritradeApi = $authenticator->authenticate();
+
+        return $tdAmeritradeApi;
     }
 
     /**

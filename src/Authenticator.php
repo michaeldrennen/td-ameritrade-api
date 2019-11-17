@@ -14,6 +14,7 @@ class Authenticator {
 
     const AUTH_URI = 'https://auth.tdameritrade.com/';
 
+    protected $debug = FALSE;
 
     /**
      * @var string The consumer key for your TD Ameritrade API app.
@@ -66,7 +67,8 @@ class Authenticator {
     }
 
 
-    public function authenticate() {
+    public function authenticate( bool $debug = FALSE ): TDAmeritradeAPI {
+        $this->debug    = $debug;
         $loginUrl       = $this->getLoginUrl( $this->callbackUrl, $this->oauthConsumerKey );
         $browserFactory = new BrowserFactory();
 
@@ -103,7 +105,7 @@ class Authenticator {
 
         $token = $this->getTokenFromCode( $code );
 
-        return $token;
+        return new TDAmeritradeAPI( $this->userName, $token, $debug );
     }
 
     protected function getLoginUrl( string $callbackUri, string $oauthConsumerKey ) {
