@@ -8,7 +8,7 @@
     "symfony/css-selector": "^4.3",
     "chrome-php/chrome": "^0.7.0",
     "nesbot/carbon": "^2.26",
-    "michaeldrennen/calendar": "^0.04.0"
+    "michaeldrennen/calendar": "dev-master"
   },
   "require-dev": {
     "phpunit/phpunit": "^8.4"
