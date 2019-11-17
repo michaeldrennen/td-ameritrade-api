@@ -144,10 +144,10 @@ class MarketHours {
      * @throws Exception
      */
     public function regularMarketClose(): Carbon {
-        if( isset($this->sessionHours['regularMarket']['close']) ):
-            return $this->sessionHours['regularMarket']['close'];
+        if( isset($this->sessionHours['regularMarket']['end']) ):
+            return $this->sessionHours['regularMarket']['end'];
         endif;
-        throw new Exception("The regular market close time was not set.");
+        throw new Exception("The regular market end time was not set.");
     }
 
 }
