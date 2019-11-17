@@ -55,7 +55,6 @@ trait MarketHoursTrait {
         $now            = Carbon::now( 'America/New_York' );
         $nextMarketOpen = Calendar::getNextUSMarketOpen( $now );
         return $this->getEquityMarketHours( $nextMarketOpen );
-
     }
 
 }

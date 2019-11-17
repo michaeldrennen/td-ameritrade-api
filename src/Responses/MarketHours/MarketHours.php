@@ -125,4 +125,28 @@ class MarketHours {
         return TRUE;
     }
 
+
+    /**
+     * @return Carbon
+     * @throws \Exception
+     */
+    public function regularMarketOpen(): Carbon {
+        if( isset($this->sessionHours['regularMarket']['start']) ):
+            return $this->sessionHours['regularMarket']['start'];
+        endif;
+        throw new \Exception("The regular market open time was not set.");
+    }
+
+
+    /**
+     * @return Carbon
+     * @throws \Exception
+     */
+    public function regularMarketClose(): Carbon {
+        if( isset($this->sessionHours['regularMarket']['close']) ):
+            return $this->sessionHours['regularMarket']['close'];
+        endif;
+        throw new \Exception("The regular market close time was not set.");
+    }
+
 }

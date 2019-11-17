@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c1eda3752449d89979961d168f4daa59",
+    "content-hash": "d7a5192a0c2e227b6bb561440795aacb",
     "packages": [
         {
             "name": "apix/log",
@@ -347,16 +347,16 @@
         },
         {
             "name": "michaeldrennen/calendar",
-            "version": "v0.04",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/michaeldrennen/Calendar.git",
-                "reference": "79d28bd4d10f9a1e853d650436a6cd2824a2c50f"
+                "reference": "5bedadf310a1795f4cc08e111d830aeeeccf973e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/michaeldrennen/Calendar/zipball/79d28bd4d10f9a1e853d650436a6cd2824a2c50f",
-                "reference": "79d28bd4d10f9a1e853d650436a6cd2824a2c50f",
+                "url": "https://api.github.com/repos/michaeldrennen/Calendar/zipball/5bedadf310a1795f4cc08e111d830aeeeccf973e",
+                "reference": "5bedadf310a1795f4cc08e111d830aeeeccf973e",
                 "shasum": ""
             },
             "require": {
@@ -382,7 +382,7 @@
                 }
             ],
             "description": "A PHP library to help querying dates.",
-            "time": "2019-09-03T06:12:59+00:00"
+            "time": "2019-09-11T20:15:59+00:00"
         },
         {
             "name": "nesbot/carbon",
@@ -2577,7 +2577,9 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "michaeldrennen/calendar": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],
