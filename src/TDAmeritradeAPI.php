@@ -29,39 +29,39 @@ class TDAmeritradeAPI {
     }
 
 
-    public function login( string $oauthConsumerKey,
-                           string $userName,
-                           string $password,
-                           string $callbackUrl,
-                           string $question1,
-                           string $answer1,
-                           string $question2,
-                           string $answer2,
-                           string $question3,
-                           string $answer3,
-                           string $question4,
-                           string $answer4,
-                           bool $debug = FALSE ) {
-        $this->userName = $userName;
-
-        $authenticator = new Authenticator( $oauthConsumerKey,
-                                            $userName,
-                                            $password,
-                                            $callbackUrl,
-                                            $question1,
-                                            $answer1,
-                                            $question2,
-                                            $answer2,
-                                            $question3,
-                                            $answer3,
-                                            $question4,
-                                            $answer4 );
-
-        $this->token = $authenticator->authenticate();
-
-        $this->guzzle = $this->createGuzzleClient( $this->token, $debug );
-
-    }
+//    public function login( string $oauthConsumerKey,
+//                           string $userName,
+//                           string $password,
+//                           string $callbackUrl,
+//                           string $question1,
+//                           string $answer1,
+//                           string $question2,
+//                           string $answer2,
+//                           string $question3,
+//                           string $answer3,
+//                           string $question4,
+//                           string $answer4,
+//                           bool $debug = FALSE ) {
+//        $this->userName = $userName;
+//
+//        $authenticator = new Authenticator( $oauthConsumerKey,
+//                                            $userName,
+//                                            $password,
+//                                            $callbackUrl,
+//                                            $question1,
+//                                            $answer1,
+//                                            $question2,
+//                                            $answer2,
+//                                            $question3,
+//                                            $answer3,
+//                                            $question4,
+//                                            $answer4 );
+//
+//        $this->token = $authenticator->authenticate();
+//
+//        $this->guzzle = $this->createGuzzleClient( $this->token, $debug );
+//
+//    }
 
     public function getUserName(): string {
         return $this->userName;
@@ -83,7 +83,11 @@ class TDAmeritradeAPI {
      */
     public function getAccounts(): SecuritiesAccounts {
         $uri      = 'v1/accounts';
-        $options  = [];
+        $options  = [
+            'query' => [
+                'fields' => ['positions','orders']
+            ]
+        ];
         $response = $this->guzzle->request( 'GET', $uri, $options );
         $body     = $response->getBody();
         $json     = json_decode( $body, TRUE );
@@ -100,7 +104,11 @@ class TDAmeritradeAPI {
      */
     public function getAccount( string $accountId ): SecuritiesAccount {
         $uri      = 'v1/accounts/' . $accountId;
-        $options  = [];
+        $options  = [
+            'query' => [
+                'fields' => ['positions','orders']
+            ]
+        ];
         $response = $this->guzzle->request( 'GET', $uri, $options );
         $body     = $response->getBody();
         $json     = json_decode( $body, TRUE );
