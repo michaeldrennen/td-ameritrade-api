@@ -21,20 +21,27 @@ class TDAmeritradeAPI {
     protected $userName;
     protected $token;
 
-    public function __construct( string $oauthConsumerKey,
-                                 string $userName,
-                                 string $password,
-                                 string $callbackUrl,
-                                 string $question1,
-                                 string $answer1,
-                                 string $question2,
-                                 string $answer2,
-                                 string $question3,
-                                 string $answer3,
-                                 string $question4,
-                                 string $answer4,
-                                 bool $debug = FALSE ) {
+    public function __construct( string $userName = NULL, string $token = NULL, bool $debug = FALSE ) {
+        $this->userName = $userName;
+        $this->token    = $token;
+        $this->guzzle   = $this->createGuzzleClient( $this->token, $debug );
 
+    }
+
+
+    public function login( string $oauthConsumerKey,
+                           string $userName,
+                           string $password,
+                           string $callbackUrl,
+                           string $question1,
+                           string $answer1,
+                           string $question2,
+                           string $answer2,
+                           string $question3,
+                           string $answer3,
+                           string $question4,
+                           string $answer4,
+                           bool $debug = FALSE ) {
         $this->userName = $userName;
 
         $authenticator = new Authenticator( $oauthConsumerKey,
