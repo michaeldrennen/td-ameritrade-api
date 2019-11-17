@@ -4,6 +4,7 @@ namespace MichaelDrennen\TDAmeritradeAPI\Responses;
 
 
 use Carbon\Carbon;
+use Exception;
 
 class MarketHours {
     /**
@@ -91,7 +92,7 @@ class MarketHours {
 
     /**
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function marketIsOpen(): bool {
         if ( FALSE == $this->isOpen ):
@@ -128,25 +129,25 @@ class MarketHours {
 
     /**
      * @return Carbon
-     * @throws \Exception
+     * @throws Exception
      */
     public function regularMarketOpen(): Carbon {
         if( isset($this->sessionHours['regularMarket']['start']) ):
             return $this->sessionHours['regularMarket']['start'];
         endif;
-        throw new \Exception("The regular market open time was not set.");
+        throw new Exception("The regular market open time was not set.");
     }
 
 
     /**
      * @return Carbon
-     * @throws \Exception
+     * @throws Exception
      */
     public function regularMarketClose(): Carbon {
         if( isset($this->sessionHours['regularMarket']['close']) ):
             return $this->sessionHours['regularMarket']['close'];
         endif;
-        throw new \Exception("The regular market close time was not set.");
+        throw new Exception("The regular market close time was not set.");
     }
 
 }
