@@ -18,6 +18,7 @@ class TDAmeritradeAPI {
     use QuotesTrait;
     use MarketHoursTrait;
 
+    protected $userName;
     protected $token;
 
     public function __construct( string $oauthConsumerKey,
@@ -33,6 +34,8 @@ class TDAmeritradeAPI {
                                  string $question4,
                                  string $answer4,
                                  bool $debug = FALSE ) {
+
+        $this->userName = $userName;
 
         $authenticator = new Authenticator( $oauthConsumerKey,
                                             $userName,
@@ -51,6 +54,10 @@ class TDAmeritradeAPI {
 
         $this->guzzle = $this->createGuzzleClient( $this->token, $debug );
 
+    }
+
+    public function getUserName(): string {
+        return $this->userName;
     }
 
     /**
