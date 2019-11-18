@@ -5,6 +5,7 @@ namespace MichaelDrennen\TDAmeritrade\Tests;
 use Carbon\Carbon;
 use MichaelDrennen\TDAmeritradeAPI\Authenticator;
 use MichaelDrennen\TDAmeritradeAPI\Responses\Qutoes\Quote;
+use MichaelDrennen\TDAmeritradeAPI\Responses\SecuritiesAccount;
 use MichaelDrennen\TDAmeritradeAPI\TDAmeritradeAPI;
 use PHPUnit\Framework\TestCase;
 
@@ -59,8 +60,10 @@ class TDAmeritradeTest extends TestCase {
 //        $securitiesAccounts = $tdAmeritrade->getAccounts();
 //        $this->assertInstanceOf( SecuritiesAccounts::class, $securitiesAccounts );
 //
-//        $securitiesAccount = $tdAmeritrade->getAccount( $accountId );
-//        $this->assertInstanceOf( SecuritiesAccount::class, $securitiesAccount );
+        $securitiesAccount = $tdAmeritrade->getAccount( $accountId );
+        $this->assertInstanceOf( SecuritiesAccount::class, $securitiesAccount );
+
+        print_r($securitiesAccount);
 
 
         //$tdAmeritrade->buyStockMarketPrice( $accountId, 'LODE', 1 );
@@ -68,14 +71,14 @@ class TDAmeritradeTest extends TestCase {
 //        $tdAmeritrade->sellStockAllSharesMarketPrice( $accountId, 'LODE' );
         //$tdAmeritrade->createSavedBuyMarketOrder( $accountId, 'LODE', 1 );
 
-        $quote = $tdAmeritrade->getStockQuote( 'LODE' );
-        $this->assertInstanceOf( Quote::class, $quote );
-
-
-        //$date        = Carbon::create( 2019, 11, 14, 12, 0, 0, 'America/New_York' );
-        $date        = Carbon::now( 'America/New_York' )->addMonth()->setHour(20);
-        $marketHours = $tdAmeritrade->getEquityMarketHours( $date );
-        print_r( $marketHours );
+//        $quote = $tdAmeritrade->getStockQuote( 'LODE' );
+//        $this->assertInstanceOf( Quote::class, $quote );
+//
+//
+//        //$date        = Carbon::create( 2019, 11, 14, 12, 0, 0, 'America/New_York' );
+//        $date        = Carbon::now( 'America/New_York' )->addMonth()->setHour(20);
+//        $marketHours = $tdAmeritrade->getEquityMarketHours( $date );
+//        print_r( $marketHours );
     }
 
 }

@@ -56,6 +56,16 @@ class SecuritiesAccount {
      */
     public $projectedBalances;
 
+    /**
+     * @var Positions
+     */
+    public $positions;
+
+
+    /**
+     * @var Orders
+     */
+    public $orders;
 
     public function __construct( array $values ) {
         $this->type                    = (string)$values[ 'type' ];
@@ -66,5 +76,17 @@ class SecuritiesAccount {
         $this->initialBalances         = new InitialBalances( $values[ 'initialBalances' ] );
         $this->currentBalances         = new CurrentBalances( $values[ 'currentBalances' ] );
         $this->projectedBalances       = new ProjectedBalances( $values[ 'projectedBalances' ] );
+
+        // These can be optionally returned.
+        if ( isset( $values[ 'positions' ] ) ):
+            $this->positions = new Positions( $values[ 'positions' ] );
+        endif;
+
+        // These can be optionally returned.
+        if ( isset( $values[ 'orderStrategies' ] ) ):
+            $this->orders = new Orders( $values[ 'orderStrategies' ] );
+        endif;
+
+
     }
 }

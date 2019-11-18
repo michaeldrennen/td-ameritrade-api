@@ -85,7 +85,7 @@ class TDAmeritradeAPI {
         $uri      = 'v1/accounts';
         $options  = [
             'query' => [
-                'fields' => ['positions','orders']
+                'fields' => 'positions,orders'
             ]
         ];
         $response = $this->guzzle->request( 'GET', $uri, $options );
@@ -106,7 +106,7 @@ class TDAmeritradeAPI {
         $uri      = 'v1/accounts/' . $accountId;
         $options  = [
             'query' => [
-                'fields' => ['positions','orders']
+                'fields' => 'positions,orders'
             ]
         ];
         $response = $this->guzzle->request( 'GET', $uri, $options );
