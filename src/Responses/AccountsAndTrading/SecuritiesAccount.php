@@ -57,13 +57,13 @@ class SecuritiesAccount {
     public $projectedBalances;
 
     /**
-     * @var Positions
+     * @var array
      */
     public $positions;
 
 
     /**
-     * @var Orders
+     * @var array
      */
     public $orders;
 
@@ -79,12 +79,16 @@ class SecuritiesAccount {
 
         // These can be optionally returned.
         if ( isset( $values[ 'positions' ] ) ):
-            $this->positions = new Positions( $values[ 'positions' ] );
+            foreach ( $values[ 'positions' ] as $i => $positionData ):
+                $this->positions[] = new Position( $positionData );
+            endforeach;
         endif;
 
         // These can be optionally returned.
         if ( isset( $values[ 'orderStrategies' ] ) ):
-            $this->orders = new Orders( $values[ 'orderStrategies' ] );
+            foreach ( $values[ 'orderStrategies' ] as $i => $orderData ):
+                $this->orders[] = new Order( $orderData );
+            endforeach;
         endif;
 
 
