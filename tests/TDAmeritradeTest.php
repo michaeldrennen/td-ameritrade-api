@@ -48,6 +48,7 @@ class TDAmeritradeTest extends TestCase {
 
     /**
      * @test
+     * @group poop
      */
     public function constructorShouldCreateInstance() {
 
@@ -71,8 +72,8 @@ class TDAmeritradeTest extends TestCase {
 //        $tdAmeritrade->sellStockAllSharesMarketPrice( $accountId, 'LODE' );
         //$tdAmeritrade->createSavedBuyMarketOrder( $accountId, 'LODE', 1 );
 
-        $quote = $tdAmeritrade->getStockQuote( 'WGP' );
-        print_r( $quote );
+//        $quote = $tdAmeritrade->getStockQuote( 'WGP' );
+//        print_r( $quote );
 //        $this->assertInstanceOf( Quote::class, $quote );
 //
 //

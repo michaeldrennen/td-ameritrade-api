@@ -233,6 +233,9 @@ class Authenticator {
         $jsonString = $page->evaluate( 'document.body.innerText' )->getReturnValue();
         $json       = \GuzzleHttp\json_decode( $jsonString, TRUE );
 
+        echo __LINE__;
+        print_r( $json ); //clickTheAllowButtonAndReturnTheCode
+
         return (string)$json[ 'code' ];
     }
 
@@ -257,12 +260,15 @@ class Authenticator {
                 'code'         => $code,
                 'client_id'    => $this->oauthConsumerKey,
                 'redirect_uri' => $this->callbackUrl,
+                'access_type'  => 'offline',
             ],
         ];
         $response = $guzzle->request( 'POST', $uri, $options );
         $body     = $response->getBody();
 
         $json = \GuzzleHttp\json_decode( $body, TRUE );
+
+        $refreshToken = $json['refresh_token'];
 
         return $json[ 'access_token' ];
     }
