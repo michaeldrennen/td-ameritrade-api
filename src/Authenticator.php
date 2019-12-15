@@ -125,11 +125,12 @@ class Authenticator {
         endif;
 
 
-        $tokens       = $this->getTokensFromCode( $code );
-        $accessToken  = $tokens[ 'access_token' ];
-        $refreshToken = $tokens[ 'refresh_token' ];
+        $tokens                       = $this->getTokensFromCode( $code );
+        $accessToken                  = $tokens[ 'access_token' ];
+        $refreshToken                 = $tokens[ 'refresh_token' ];
+        $refreshTokenExpiresInSeconds = $tokens[ 'refresh_token_expires_in' ];
 
-        return new TDAmeritradeAPI( $this->userName, $accessToken, $refreshToken, $debug );
+        return new TDAmeritradeAPI( $this->userName, $accessToken, $refreshToken, $refreshTokenExpiresInSeconds, $debug );
     }
 
     protected function getLoginUrl( string $callbackUri, string $oauthConsumerKey ) {

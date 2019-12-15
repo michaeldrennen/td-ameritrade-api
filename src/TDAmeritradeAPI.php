@@ -24,6 +24,7 @@ class TDAmeritradeAPI {
     protected $userName;
     protected $accessToken;
     protected $refreshToken;
+    protected $refreshTokenExpiresInSeconds;
 
 
     /**
@@ -31,16 +32,19 @@ class TDAmeritradeAPI {
      * @param string|NULL $userName
      * @param string|NULL $accessToken
      * @param string|NULL $refreshToken
+     * @param int|NULL $refreshTokenExpiresInSeconds
      * @param bool $debug
      */
     public function __construct( string $userName = NULL,
                                  string $accessToken = NULL,
                                  string $refreshToken = NULL,
+                                 int $refreshTokenExpiresInSeconds = NULL,
                                  bool $debug = FALSE ) {
-        $this->userName     = $userName;
-        $this->accessToken  = $accessToken;
-        $this->refreshToken = $refreshToken;
-        $this->guzzle       = $this->createGuzzleClient( $this->accessToken, $debug );
+        $this->userName                     = $userName;
+        $this->accessToken                  = $accessToken;
+        $this->refreshToken                 = $refreshToken;
+        $this->refreshTokenExpiresInSeconds = $refreshTokenExpiresInSeconds;
+        $this->guzzle                       = $this->createGuzzleClient( $this->accessToken, $debug );
     }
 
 
@@ -92,6 +96,10 @@ class TDAmeritradeAPI {
 
     public function getRefreshToken(): string {
         return $this->refreshToken;
+    }
+
+    public function getRefreshTokenExpiresInSeconds(): ?int {
+        return $this->refreshTokenExpiresInSeconds;
     }
 
 
