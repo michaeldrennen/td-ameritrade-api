@@ -2,6 +2,7 @@
 
 namespace MichaelDrennen\TDAmeritradeAPI;
 
+use Carbon\Carbon;
 use HeadlessChromium\BrowserFactory;
 use HeadlessChromium\Exception\NavigationExpired;
 use HeadlessChromium\Exception\OperationTimedOut;
@@ -27,6 +28,9 @@ class Authenticator {
      */
     protected $refreshToken;
 
+    protected $refreshTokenExpiresInSeconds;
+
+
     /**
      * @var string The TD Ameritrade username to be authenticated.
      */
@@ -50,6 +54,9 @@ class Authenticator {
      */
     public $loadedFromRefreshToken = FALSE;
 
+
+    const REFRESH_TOKEN_MAX_SECONDS_BEFORE_REFRESH = 86400 * 30;
+
     public function __construct( string $oauthConsumerKey,
                                  string $userName,
                                  string $password,
@@ -62,7 +69,8 @@ class Authenticator {
                                  string $answer3,
                                  string $question4,
                                  string $answer4,
-                                 string $refreshToken = NULL
+                                 string $refreshToken = NULL,
+                                 int $refreshTokenExpiresInSeconds = NULL
     ) {
 
         $this->oauthConsumerKey = $oauthConsumerKey;
@@ -75,7 +83,8 @@ class Authenticator {
         $this->securityQuestions[ $question3 ] = $answer3;
         $this->securityQuestions[ $question4 ] = $answer4;
 
-        $this->refreshToken = $refreshToken;
+        $this->refreshToken                 = $refreshToken;
+        $this->refreshTokenExpiresInSeconds = $refreshTokenExpiresInSeconds; // In seconds EST
     }
 
 
@@ -83,11 +92,17 @@ class Authenticator {
         $this->debug = $debug;
 
         if ( $this->refreshToken ):
-            echo "The refresh token exists and is " . $this->refreshToken;
             $tokens                       = $this->getAccessTokenFromRefreshToken( $this->refreshToken );
             $accessToken                  = $tokens[ 'access_token' ];
+            $refreshTokenExpiresInSeconds = $tokens[ 'refresh_token_expires_in' ];
             $this->loadedFromRefreshToken = TRUE;
-            return new TDAmeritradeAPI( $this->userName, $accessToken, $this->refreshToken, $debug );
+            $this->resetRefreshTokenIfItWillExpireSoon( $this->refreshToken, $refreshTokenExpiresInSeconds );
+
+            return new TDAmeritradeAPI( $this->userName,
+                                        $accessToken,
+                                        $this->refreshToken,
+                                        $this->refreshTokenExpiresInSeconds,
+                                        $debug );
         endif;
 
 
@@ -125,12 +140,48 @@ class Authenticator {
         endif;
 
 
-        $tokens                       = $this->getTokensFromCode( $code );
-        $accessToken                  = $tokens[ 'access_token' ];
-        $refreshToken                 = $tokens[ 'refresh_token' ];
-        $refreshTokenExpiresInSeconds = $tokens[ 'refresh_token_expires_in' ];
+        $tokens             = $this->getTokensFromCode( $code );
+        $accessToken        = $tokens[ 'access_token' ];
+        $this->refreshToken = $tokens[ 'refresh_token' ];
 
-        return new TDAmeritradeAPI( $this->userName, $accessToken, $refreshToken, $refreshTokenExpiresInSeconds, $debug );
+        return new TDAmeritradeAPI( $this->userName,
+                                    $accessToken,
+                                    $this->refreshToken,
+                                    $this->refreshTokenExpiresInSeconds,
+                                    $debug );
+    }
+
+    protected function resetRefreshTokenIfItWillExpireSoon( string $refreshToken, int $refreshTokenExpiresInSeconds ): void {
+        $now          = time();
+        $deadline     = $now + $refreshTokenExpiresInSeconds;
+        $refreshAfter = $deadline - self::REFRESH_TOKEN_MAX_SECONDS_BEFORE_REFRESH;
+        if ( $now < $refreshAfter ):
+            return;
+        endif;
+
+        $guzzle = $this->createGuzzleClient();
+
+        // https://api.tdameritrade.com/v1/oauth2/token
+        $uri = 'v1/oauth2/token';
+
+        $options  = [
+
+            'form_params' => [
+                'grant_type'    => 'refresh_token',
+                'refresh_token' => $refreshToken,
+                'access_type'   => 'offline',
+                'client_id'     => $this->oauthConsumerKey,
+            ],
+        ];
+        $response = $guzzle->request( 'POST', $uri, $options );
+        $body     = $response->getBody();
+
+        $json = \GuzzleHttp\json_decode( $body, TRUE );
+
+        $this->refreshToken                 = $json[ 'refresh_token' ];
+        $this->refreshTokenExpiresInSeconds = $json[ 'refresh_token_expires_in' ];
+
+        return;
     }
 
     protected function getLoginUrl( string $callbackUri, string $oauthConsumerKey ) {
