@@ -2,13 +2,15 @@
 
 namespace MichaelDrennen\TDAmeritradeAPI;
 
+use GuzzleHttp\RequestOptions;
 
 use MichaelDrennen\TDAmeritradeAPI\Exceptions\BaseClientException;
 use MichaelDrennen\TDAmeritradeAPI\Exceptions\BaseServerException;
 use MichaelDrennen\TDAmeritradeAPI\Exceptions\ClientExceptionFactory;
 use MichaelDrennen\TDAmeritradeAPI\Responses\SecuritiesAccount;
 use MichaelDrennen\TDAmeritradeAPI\Responses\SecuritiesAccounts;
-use GuzzleHttp\RequestOptions;
+
+use MichaelDrennen\TDAmeritradeAPI\Traits\AuthenticationTrait;
 use MichaelDrennen\TDAmeritradeAPI\Traits\MarketHoursTrait;
 use MichaelDrennen\TDAmeritradeAPI\Traits\QuotesTrait;
 
@@ -17,15 +19,28 @@ class TDAmeritradeAPI {
     use APIClientTrait;
     use QuotesTrait;
     use MarketHoursTrait;
+    use AuthenticationTrait;
 
     protected $userName;
-    protected $token;
+    protected $accessToken;
+    protected $refreshToken;
 
-    public function __construct( string $userName = NULL, string $token = NULL, bool $debug = FALSE ) {
-        $this->userName = $userName;
-        $this->token    = $token;
-        $this->guzzle   = $this->createGuzzleClient( $this->token, $debug );
 
+    /**
+     * TDAmeritradeAPI constructor.
+     * @param string|NULL $userName
+     * @param string|NULL $accessToken
+     * @param string|NULL $refreshToken
+     * @param bool $debug
+     */
+    public function __construct( string $userName = NULL,
+                                 string $accessToken = NULL,
+                                 string $refreshToken = NULL,
+                                 bool $debug = FALSE ) {
+        $this->userName     = $userName;
+        $this->accessToken  = $accessToken;
+        $this->refreshToken = $refreshToken;
+        $this->guzzle       = $this->createGuzzleClient( $this->accessToken, $debug );
     }
 
 
@@ -71,8 +86,12 @@ class TDAmeritradeAPI {
      * A simple accessor method to return the authentication token from TD Ameritrade.
      * @return string
      */
-    public function getToken(): string {
-        return $this->token;
+    public function getAccessToken(): string {
+        return $this->accessToken;
+    }
+
+    public function getRefreshToken(): string {
+        return $this->refreshToken;
     }
 
 
@@ -85,8 +104,8 @@ class TDAmeritradeAPI {
         $uri      = 'v1/accounts';
         $options  = [
             'query' => [
-                'fields' => 'positions,orders'
-            ]
+                'fields' => 'positions,orders',
+            ],
         ];
         $response = $this->guzzle->request( 'GET', $uri, $options );
         $body     = $response->getBody();
@@ -106,8 +125,8 @@ class TDAmeritradeAPI {
         $uri      = 'v1/accounts/' . $accountId;
         $options  = [
             'query' => [
-                'fields' => 'positions,orders'
-            ]
+                'fields' => 'positions,orders',
+            ],
         ];
         $response = $this->guzzle->request( 'GET', $uri, $options );
         $body     = $response->getBody();

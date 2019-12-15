@@ -23,6 +23,11 @@ class Authenticator {
     protected $oauthConsumerKey;
 
     /**
+     * @var string
+     */
+    protected $refreshToken;
+
+    /**
      * @var string The TD Ameritrade username to be authenticated.
      */
     protected $userName;
@@ -40,6 +45,10 @@ class Authenticator {
 
     protected $securityQuestions = [];
 
+    /**
+     * @var bool Really just a debug flag to test if the refresh token system is working.
+     */
+    public $loadedFromRefreshToken = FALSE;
 
     public function __construct( string $oauthConsumerKey,
                                  string $userName,
@@ -52,7 +61,8 @@ class Authenticator {
                                  string $question3,
                                  string $answer3,
                                  string $question4,
-                                 string $answer4
+                                 string $answer4,
+                                 string $refreshToken = NULL
     ) {
 
         $this->oauthConsumerKey = $oauthConsumerKey;
@@ -64,11 +74,23 @@ class Authenticator {
         $this->securityQuestions[ $question2 ] = $answer2;
         $this->securityQuestions[ $question3 ] = $answer3;
         $this->securityQuestions[ $question4 ] = $answer4;
+
+        $this->refreshToken = $refreshToken;
     }
 
 
     public function authenticate( bool $debug = FALSE ): TDAmeritradeAPI {
-        $this->debug    = $debug;
+        $this->debug = $debug;
+
+        if ( $this->refreshToken ):
+            echo "The refresh token exists and is " . $this->refreshToken;
+            $tokens                       = $this->getAccessTokenFromRefreshToken( $this->refreshToken );
+            $accessToken                  = $tokens[ 'access_token' ];
+            $this->loadedFromRefreshToken = TRUE;
+            return new TDAmeritradeAPI( $this->userName, $accessToken, $this->refreshToken, $debug );
+        endif;
+
+
         $loginUrl       = $this->getLoginUrl( $this->callbackUrl, $this->oauthConsumerKey );
         $browserFactory = new BrowserFactory();
 
@@ -103,9 +125,11 @@ class Authenticator {
         endif;
 
 
-        $token = $this->getTokenFromCode( $code );
+        $tokens       = $this->getTokensFromCode( $code );
+        $accessToken  = $tokens[ 'access_token' ];
+        $refreshToken = $tokens[ 'refresh_token' ];
 
-        return new TDAmeritradeAPI( $this->userName, $token, $debug );
+        return new TDAmeritradeAPI( $this->userName, $accessToken, $refreshToken, $debug );
     }
 
     protected function getLoginUrl( string $callbackUri, string $oauthConsumerKey ) {
@@ -233,8 +257,8 @@ class Authenticator {
         $jsonString = $page->evaluate( 'document.body.innerText' )->getReturnValue();
         $json       = \GuzzleHttp\json_decode( $jsonString, TRUE );
 
-        echo __LINE__;
-        print_r( $json ); //clickTheAllowButtonAndReturnTheCode
+//        echo __LINE__;
+//        print_r( $json ); //clickTheAllowButtonAndReturnTheCode
 
         return (string)$json[ 'code' ];
     }
@@ -246,7 +270,7 @@ class Authenticator {
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @see https://developer.tdameritrade.com/authentication/apis/post/token-0
      */
-    protected function getTokenFromCode( string $code ): string {
+    protected function getTokensFromCode( string $code ): array {
 
         $guzzle = $this->createGuzzleClient();
 
@@ -268,9 +292,47 @@ class Authenticator {
 
         $json = \GuzzleHttp\json_decode( $body, TRUE );
 
-        $refreshToken = $json['refresh_token'];
+        return [
+            'access_token'             => $json[ 'access_token' ],              // Big long string... :)
+            'refresh_token'            => $json[ 'refresh_token' ],             // Big long string... :)
+            'scope'                    => $json[ 'scope' ],                     // Ex: PlaceTrades AccountAccess MoveMoney
+            'expires_in'               => $json[ 'expires_in' ],                // Ex: 1800
+            'refresh_token_expires_in' => $json[ 'refresh_token_expires_in' ],  // Ex: 7776000
+            'token_type'               => $json[ 'token_type' ],                // Ex: Bearer
+        ];
+    }
 
-        return $json[ 'access_token' ];
+
+    /**
+     * @param string $refreshToken
+     * @return array
+     */
+    public function getAccessTokenFromRefreshToken( string $refreshToken ): array {
+        $guzzle = $this->createGuzzleClient();
+
+        // https://api.tdameritrade.com/v1/oauth2/token
+        $uri = 'v1/oauth2/token';
+
+        $options  = [
+
+            'form_params' => [
+                'grant_type'    => 'refresh_token',
+                'refresh_token' => $refreshToken,
+                'client_id'     => $this->oauthConsumerKey,
+            ],
+        ];
+        $response = $guzzle->request( 'POST', $uri, $options );
+        $body     = $response->getBody();
+
+        $json = \GuzzleHttp\json_decode( $body, TRUE );
+
+        return [
+            'access_token' => $json[ 'access_token' ],    // Big long string
+            'scope'        => $json[ 'scope' ],           // Ex: "PlaceTrades AccountAccess MoveMoney"
+            'expires_in'   => $json[ 'expires_in' ],      // Ex: 1800
+            'token_type'   => $json[ 'token_type' ],      // Ex: Bearer
+        ];
+
     }
 
 }

@@ -2,20 +2,20 @@
 
 namespace MichaelDrennen\TDAmeritrade\Tests;
 
-use Carbon\Carbon;
 use MichaelDrennen\TDAmeritradeAPI\Authenticator;
-use MichaelDrennen\TDAmeritradeAPI\Responses\Qutoes\Quote;
 use MichaelDrennen\TDAmeritradeAPI\Responses\SecuritiesAccount;
 use MichaelDrennen\TDAmeritradeAPI\TDAmeritradeAPI;
 use PHPUnit\Framework\TestCase;
 
 class TDAmeritradeTest extends TestCase {
 
+    public $refreshToken = NULL;
 
     /**
+     * @param string|NULL $refreshToken
      * @return TDAmeritradeAPI
      */
-    protected function getTDAmeritradeAPIInstance(): TDAmeritradeAPI {
+    protected function getTDAmeritradeAPIInstance( string $refreshToken = NULL ): TDAmeritradeAPI {
         $callbackUrl      = getenv( 'TDAMERITRADE_CALLBACK_URL' );
         $oauthConsumerKey = getenv( 'TDAMERITRADE_OAUTH_CONSUMER_KEY' );
         $userName         = getenv( 'TDAMERITRADE_USERNAME' );
@@ -40,8 +40,13 @@ class TDAmeritradeTest extends TestCase {
                                               $question_3,
                                               $answer_3,
                                               $question_4,
-                                              $answer_4 );
+                                              $answer_4,
+                                              $refreshToken );
         $tdAmeritradeApi = $authenticator->authenticate();
+
+        $this->refreshToken = $tdAmeritradeApi->getRefreshToken();
+
+        var_dump( $authenticator->loadedFromRefreshToken );
 
         return $tdAmeritradeApi;
     }
@@ -55,16 +60,23 @@ class TDAmeritradeTest extends TestCase {
         $accountId    = getenv( 'TDAMERITRADE_ACCOUNT_ID' );
         $tdAmeritrade = $this->getTDAmeritradeAPIInstance();
         $this->assertInstanceOf( TDAmeritradeAPI::class, $tdAmeritrade );
-        $code = $tdAmeritrade->getToken();
-        $this->assertNotEmpty( $code );
+        $accessToken  = $tdAmeritrade->getAccessToken();
+        $refreshToken = $tdAmeritrade->getRefreshToken();
+
+
+        $this->assertNotEmpty( $accessToken );
+        $this->assertNotEmpty( $refreshToken );
+
+        $tdAmeritrade = $this->getTDAmeritradeAPIInstance( $refreshToken );
+
 
 //        $securitiesAccounts = $tdAmeritrade->getAccounts();
 //        $this->assertInstanceOf( SecuritiesAccounts::class, $securitiesAccounts );
 //
-        $securitiesAccount = $tdAmeritrade->getAccount( $accountId );
-        $this->assertInstanceOf( SecuritiesAccount::class, $securitiesAccount );
+//        $securitiesAccount = $tdAmeritrade->getAccount( $accountId );
+//        $this->assertInstanceOf( SecuritiesAccount::class, $securitiesAccount );
 
-        //print_r( $securitiesAccount );
+//        print_r( $securitiesAccount );
 
 
         //$tdAmeritrade->buyStockMarketPrice( $accountId, 'LODE', 1 );
