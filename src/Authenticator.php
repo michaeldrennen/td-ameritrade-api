@@ -92,17 +92,23 @@ class Authenticator {
         $this->debug = $debug;
 
         if ( $this->refreshToken ):
-            $tokens                       = $this->getAccessTokenFromRefreshToken( $this->refreshToken );
-            $accessToken                  = $tokens[ 'access_token' ];
-            $refreshTokenExpiresInSeconds = $tokens[ 'refresh_token_expires_in' ];
-            $this->loadedFromRefreshToken = TRUE;
-            $this->resetRefreshTokenIfItWillExpireSoon( $this->refreshToken, $refreshTokenExpiresInSeconds );
+            try{
+                $tokens                       = $this->getAccessTokenFromRefreshToken( $this->refreshToken );
+                $accessToken                  = $tokens[ 'access_token' ];
+                $refreshTokenExpiresInSeconds = $tokens[ 'refresh_token_expires_in' ];
+                $this->loadedFromRefreshToken = TRUE;
+                $this->resetRefreshTokenIfItWillExpireSoon( $this->refreshToken, $refreshTokenExpiresInSeconds );
 
-            return new TDAmeritradeAPI( $this->userName,
-                                        $accessToken,
-                                        $this->refreshToken,
-                                        $this->refreshTokenExpiresInSeconds,
-                                        $debug );
+                return new TDAmeritradeAPI( $this->userName,
+                                            $accessToken,
+                                            $this->refreshToken,
+                                            $this->refreshTokenExpiresInSeconds,
+                                            $debug );
+            } catch (Exception $exception){
+                // The refresh token was invalid or expired.
+                // So do nothing and let the system try to re-authenticate.
+            }
+
         endif;
 
 
