@@ -17,9 +17,9 @@ class OrderLegCollection {
         $this->orderLegType   = $orderLegCollectionData[ 'orderLegType' ];
         $this->legId          = $orderLegCollectionData[ 'legId' ];
         $this->instrument     = [
-            'assetType' => $orderLegCollectionData[ 'instrument' ][ 'assetType' ],
-            'cusip'     => $orderLegCollectionData[ 'instrument' ][ 'cusip' ],
-            'symbol'    => $orderLegCollectionData[ 'instrument' ][ 'symbol' ],
+            'assetType' => $orderLegCollectionData[ 'instrument' ][ 'assetType' ] ?? NULL,
+            'cusip'     => $orderLegCollectionData[ 'instrument' ][ 'cusip' ] ?? NULL,
+            'symbol'    => $orderLegCollectionData[ 'instrument' ][ 'symbol' ] ?? NULL,
         ];
         $this->instruction    = $orderLegCollectionData[ 'instruction' ];
         $this->positionEffect = $orderLegCollectionData[ 'positionEffect' ];
