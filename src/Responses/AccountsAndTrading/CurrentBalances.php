@@ -34,6 +34,14 @@ class CurrentBalances {
     public $shortOptionMarketValue           = 0;
     public $sma                              = 0;
     public $bondValue                        = 0;
+    public $cashAvailableForTrading          = 0;
+    public $cashAvailableForWithdrawal       = 0;
+    public $cashCall                         = 0;
+    public $cashDebitCallValue               = 0;
+    public $longNonMarginableMarketValue     = 0;
+    public $totalCash                        = 0;
+    public $unsettledCash                    = 0;
+
 
     public function __construct( array $values ) {
         foreach ( $values as $name => $value ):
