@@ -21,7 +21,7 @@ $tdaClient = TDAmeritradeAPI( $userName,
 ```
 
 ```php
-// Once you have a client, you can buy stocks.
+// Once you have a client, you can buy stocks at market price.
 $accountId = 123456789;
 $ticker    = 'LODE';
 $quantity  = 1;
@@ -34,6 +34,12 @@ try {
 
 // Now, log into your TDAmeritrade account online, and you should see a new order.
 
+// To sell some shares at the market price...
+try {
+   $tdaClient->sellStockSharesMarketPrice($accountId, $ticker, $quantity);
+} catch (Exception $exception) {
+   echo $exception->getMessage();
+}
 ```
 
 asdf
