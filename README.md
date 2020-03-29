@@ -3,7 +3,7 @@
  
 A PHP library used to interact with the TD Ameritrade API
 
-
+Visit the link below to set up your developer account with TD Ameritrade, and get information on how to authenticate with their API.
 https://developer.tdameritrade.com/
 
 ```php
@@ -42,4 +42,8 @@ try {
 }
 ```
 
-asdf
+You can look through the TDAmeritradeAPI.php file for a complete list of the actions I have written code for.
+
+Happy trading!
+
+-Mike
