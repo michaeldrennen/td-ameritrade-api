@@ -7,8 +7,8 @@ use GuzzleHttp\RequestOptions;
 use MichaelDrennen\TDAmeritradeAPI\Exceptions\BaseClientException;
 use MichaelDrennen\TDAmeritradeAPI\Exceptions\BaseServerException;
 use MichaelDrennen\TDAmeritradeAPI\Exceptions\ClientExceptionFactory;
-use MichaelDrennen\TDAmeritradeAPI\Responses\SecuritiesAccount;
-use MichaelDrennen\TDAmeritradeAPI\Responses\SecuritiesAccounts;
+use MichaelDrennen\TDAmeritradeAPI\Responses\AccountsAndTrading\SecuritiesAccount;
+use MichaelDrennen\TDAmeritradeAPI\Responses\AccountsAndTrading\SecuritiesAccounts;
 
 use MichaelDrennen\TDAmeritradeAPI\Traits\AuthenticationTrait;
 use MichaelDrennen\TDAmeritradeAPI\Traits\MarketHoursTrait;

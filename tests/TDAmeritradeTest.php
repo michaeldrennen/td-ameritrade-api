@@ -3,7 +3,7 @@
 namespace MichaelDrennen\TDAmeritrade\Tests;
 
 use MichaelDrennen\TDAmeritradeAPI\Authenticator;
-use MichaelDrennen\TDAmeritradeAPI\Responses\SecuritiesAccount;
+use MichaelDrennen\TDAmeritradeAPI\Responses\AccountsAndTrading\SecuritiesAccount;
 use MichaelDrennen\TDAmeritradeAPI\TDAmeritradeAPI;
 use PHPUnit\Framework\TestCase;
 

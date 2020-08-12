@@ -1,6 +1,6 @@
 <?php
 
-namespace MichaelDrennen\TDAmeritradeAPI\Responses\Qutoes;
+namespace MichaelDrennen\TDAmeritradeAPI\Responses\Quotes;
 
 
 class Quote {

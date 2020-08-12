@@ -186,8 +186,6 @@ class Authenticator {
 
         $this->refreshToken                 = $json[ 'refresh_token' ];
         $this->refreshTokenExpiresInSeconds = $json[ 'refresh_token_expires_in' ];
-
-        return;
     }
 
     protected function getLoginUrl( string $callbackUri, string $oauthConsumerKey ) {

@@ -32,9 +32,7 @@ trait AuthenticationTrait {
         $body     = $response->getBody();
         $json     = json_decode( $body, TRUE );
 
-        $accessToken = $json['access_token'];
-
-        return $accessToken;
+        return $json['access_token'];
     }
 
 }

@@ -3,7 +3,7 @@
 namespace MichaelDrennen\TDAmeritradeAPI\Traits;
 
 use Exception;
-use MichaelDrennen\TDAmeritradeAPI\Responses\Qutoes\Quote;
+use MichaelDrennen\TDAmeritradeAPI\Responses\Quotes\Quote;
 
 trait QuotesTrait {
     use BaseTrait;

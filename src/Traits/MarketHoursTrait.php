@@ -5,7 +5,7 @@ namespace MichaelDrennen\TDAmeritradeAPI\Traits;
 
 use Carbon\Carbon;
 use MichaelDrennen\Calendar\Calendar;
-use MichaelDrennen\TDAmeritradeAPI\Responses\MarketHours;
+use MichaelDrennen\TDAmeritradeAPI\Responses\MarketHours\MarketHours;
 
 trait MarketHoursTrait {
     use BaseTrait;

@@ -1,6 +1,6 @@
 <?php
 
-namespace MichaelDrennen\TDAmeritradeAPI\Responses;
+namespace MichaelDrennen\TDAmeritradeAPI\Responses\AccountsAndTrading;
 
 
 use Carbon\Carbon;
