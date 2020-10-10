@@ -87,12 +87,10 @@ class Authenticator {
         $this->refreshTokenExpiresInSeconds = $refreshTokenExpiresInSeconds; // In seconds EST
     }
 
-
-    public function authenticate( bool $debug = FALSE ): TDAmeritradeAPI {
+    public function authenticate_v2( bool $debug = FALSE ): TDAmeritradeAPI {
         $this->debug = $debug;
-
         if ( $this->refreshToken ):
-            try{
+            try {
                 $tokens                       = $this->getAccessTokenFromRefreshToken( $this->refreshToken );
                 $accessToken                  = $tokens[ 'access_token' ];
                 $refreshTokenExpiresInSeconds = $tokens[ 'refresh_token_expires_in' ];
@@ -104,7 +102,99 @@ class Authenticator {
                                             $this->refreshToken,
                                             $this->refreshTokenExpiresInSeconds,
                                             $debug );
-            } catch (Exception $exception){
+            } catch ( Exception $exception ) {
+                // The refresh token was invalid or expired.
+                // So do nothing and let the system try to re-authenticate.
+            }
+        endif;
+
+
+        $loginUrl       = $this->getLoginUrl( $this->callbackUrl, $this->oauthConsumerKey );
+        $browserFactory = new BrowserFactory();
+
+        // starts headless chrome
+        $browser = $browserFactory->createBrowser( [
+                                                       'headless'        => TRUE,         // disable headless mode
+                                                       'connectionDelay' => 0.8,           // add 0.8 second of delay between each instruction sent to chrome,
+                                                       //'debugLogger'     => 'php://stdout', // will enable verbose mode
+                                                       'windowSize'      => [ 500, 440 ],
+                                                       'enableImages'    => FALSE,
+                                                   ] );
+
+        // creates a new page and navigate to an url
+        $page = $browser->createPage();
+        $page->navigate( $loginUrl )->waitForNavigation();
+
+        $page->evaluate( "document.querySelector('#username0').value = '" . $this->userName . "';" );
+        $page->evaluate( "document.querySelector('#password').value = '" . $this->password . "';" );
+
+        // Enables the login button.
+        $page->mouse()
+             ->move( 340, 450 )
+             ->click();
+
+// @DEBUG
+//        $screenshot = $page->screenshot( [
+//                                             'format'  => 'jpeg',  // default to 'png' - possible values: 'png', 'jpeg',
+//                                             'quality' => 80       // only if format is 'jpeg' - default 100
+//                                         ] );
+//        $screenshot->saveToFile( 'deleteme.jpg' );
+//        die( $loginUrl );
+// @ENDDEBUG
+
+//        $page->mouse()
+//             ->move( 193, 632 )
+//             ->click();
+//        $page->waitForReload();
+        $evaluation = $page->evaluate( "document.querySelector('#authform').submit();" );
+        $evaluation->waitForPageReload();
+
+        $postLoginPageInnerHTML = $page->evaluate( 'document.body.innerHTML' )->getReturnValue();
+
+//        file_put_contents('deleteme.html',$postLoginPageInnerHTML);
+//        die($postLoginPageInnerHTML);
+
+
+        if ( $this->textChallengePresented( $postLoginPageInnerHTML ) ):
+//            die('processing text challange');
+            $code = $this->processTextChallenge( $page );
+        else:
+            die('doing the other thing');
+            $page->evaluate( 'console.log("Text challenge NOT presented")' );
+
+            $code = $this->clickTheAllowButtonAndReturnTheCode( $page );
+        endif;
+
+
+        $tokens             = $this->getTokensFromCode( $code );
+        $accessToken        = $tokens[ 'access_token' ];
+        $this->refreshToken = $tokens[ 'refresh_token' ];
+
+        return new TDAmeritradeAPI( $this->userName,
+                                    $accessToken,
+                                    $this->refreshToken,
+                                    $this->refreshTokenExpiresInSeconds,
+                                    $debug );
+    }
+
+
+    public function authenticate( bool $debug = FALSE ): TDAmeritradeAPI {
+        $this->debug = $debug;
+
+        if ( $this->refreshToken ):
+            try {
+                $tokens                       = $this->getAccessTokenFromRefreshToken( $this->refreshToken );
+                $accessToken                  = $tokens[ 'access_token' ];
+                $refreshTokenExpiresInSeconds = $tokens[ 'refresh_token_expires_in' ];
+                $this->loadedFromRefreshToken = TRUE;
+                $this->resetRefreshTokenIfItWillExpireSoon( $this->refreshToken, $refreshTokenExpiresInSeconds );
+
+                return new TDAmeritradeAPI( $this->userName,
+                                            $accessToken,
+                                            $this->refreshToken,
+                                            $this->refreshTokenExpiresInSeconds,
+                                            $debug );
+            } catch ( Exception $exception ) {
                 // The refresh token was invalid or expired.
                 // So do nothing and let the system try to re-authenticate.
             }
@@ -186,6 +276,8 @@ class Authenticator {
 
         $this->refreshToken                 = $json[ 'refresh_token' ];
         $this->refreshTokenExpiresInSeconds = $json[ 'refresh_token_expires_in' ];
+
+        return;
     }
 
     protected function getLoginUrl( string $callbackUri, string $oauthConsumerKey ) {
@@ -233,14 +325,37 @@ class Authenticator {
         }
 
         $htmlFromChallengePage = $page->evaluate( 'document.body.innerHTML' )->getReturnValue();
+
         $answer                = $this->getChallengeAnswerFromLoginPageHTML( $htmlFromChallengePage );
-        $page->evaluate( "document.querySelector('#secretquestion').value = '" . $answer . "';" );
+        $page->evaluate( "document.querySelector('#secretquestion0').value = '" . $answer . "';" );
         $page->evaluate( "document.querySelector('#accept').disabled = false;" );
+
+//        $screenshot = $page->screenshot( [
+//                                             'format'  => 'jpeg',  // default to 'png' - possible values: 'png', 'jpeg',
+//                                             'quality' => 80       // only if format is 'jpeg' - default 100
+//                                         ] );
+//        $screenshot->saveToFile( 'deleteme.jpg' );
+//
+//        file_put_contents('answer.html',$answer);
+//        die('anasdwer');
 
 
         try {
-            $evaluation = $page->evaluate( "document.querySelector('#authform').submit();" );
+            //$evaluation = $page->evaluate( "document.querySelector('#authform').submit();" );
+            $evaluation = $page->evaluate( "document.querySelector('#rememberdevice').click();" );
+            $evaluation = $page->evaluate( "document.querySelector('#accept').click();" );
             $evaluation->waitForPageReload();
+
+//            $screenshot = $page->screenshot( [
+//                                             'format'  => 'jpeg',  // default to 'png' - possible values: 'png', 'jpeg',
+//                                             'quality' => 80       // only if format is 'jpeg' - default 100
+//                                         ] );
+//        $screenshot->saveToFile( 'deleteme.jpg' );
+//        die('asdfasdfad');
+
+
+
+
             $page->evaluate( 'console.log("We have made it to the ALLOW page.")' );
         } catch ( OperationTimedOut $e ) {
             // too long to load

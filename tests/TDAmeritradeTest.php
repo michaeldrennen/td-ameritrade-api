@@ -42,11 +42,12 @@ class TDAmeritradeTest extends TestCase {
                                               $question_4,
                                               $answer_4,
                                               $refreshToken );
-        $tdAmeritradeApi = $authenticator->authenticate();
+//        $tdAmeritradeApi = $authenticator->authenticate();
+        $tdAmeritradeApi = $authenticator->authenticate_v2();
 
         $this->refreshToken = $tdAmeritradeApi->getRefreshToken();
 
-        var_dump( $authenticator->loadedFromRefreshToken );
+//        var_dump( $authenticator->loadedFromRefreshToken );
 
         return $tdAmeritradeApi;
     }
