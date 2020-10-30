@@ -186,8 +186,9 @@ class TDAmeritradeAPI {
      * @param string $ticker
      * @param int $quantity
      * @param string $quantityType Ex: SHARES or DOLLARS or ALL_SHARES
-     * @param string $orderType Ex: MARKET
+     * @param string $orderType Ex: MARKET, LIMIT
      * @param string $instruction Ex: BUY
+     * @param float|NULL $price
      * @return bool
      * @throws BaseClientException
      * @throws BaseServerException
@@ -196,7 +197,13 @@ class TDAmeritradeAPI {
      * @see https://developer.tdameritrade.com/content/place-order-samples
      * @see http://docs.guzzlephp.org/en/latest/request-options.html#json
      */
-    public function placeOrder( string $accountId, string $ticker, int $quantity, string $quantityType, string $orderType, string $instruction ): bool {
+    public function placeOrder( string $accountId,
+                                string $ticker,
+                                int $quantity,
+                                string $quantityType,
+                                string $orderType,
+                                string $instruction,
+                                float $price = NULL ): bool {
         $uri        = 'v1/accounts/' . $accountId . '/orders';
         $orderArray = [
             'orderType'          => $orderType,
@@ -215,10 +222,16 @@ class TDAmeritradeAPI {
             ],
         ];
 
+        // This parameter is not required for MARKET orderType
+        if( $price ):
+            $orderArray['price'] = $price;
+        endif;
+
         try {
             $this->guzzle->request( 'POST', $uri, [ RequestOptions::JSON => $orderArray ] );
             return TRUE;
-        } catch ( \GuzzleHttp\Exception\ClientException $exception ) {
+        } catch
+        ( \GuzzleHttp\Exception\ClientException $exception ) {
             throw ClientExceptionFactory::create( $exception, [
                 'ticker'   => $ticker,
                 'quantity' => $quantity,
