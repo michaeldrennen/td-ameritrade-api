@@ -223,8 +223,8 @@ class TDAmeritradeAPI {
         ];
 
         // This parameter is not required for MARKET orderType
-        if( $price ):
-            $orderArray['price'] = $price;
+        if ( $price ):
+            $orderArray[ 'price' ] = $price;
         endif;
 
         try {
@@ -304,6 +304,75 @@ class TDAmeritradeAPI {
                                           'orderLegType' => 'EQUITY',
                                           'instruction'  => 'SELL',
                                           //                                          'quantity'     => 100000000,
+                                          'quantityType' => 'ALL_SHARES',
+                                          'instrument'   => [
+                                              'symbol'    => $ticker,
+                                              'assetType' => 'EQUITY',
+                                          ] ],
+            ],
+        ];
+
+        try {
+            $this->guzzle->request( 'POST', $uri, [ RequestOptions::JSON => $orderArray ] );
+            return TRUE;
+        } catch ( \GuzzleHttp\Exception\ClientException $exception ) {
+            throw ClientExceptionFactory::create( $exception, [
+                'ticker'   => $ticker,
+                'quantity' => 'ALL SHARES',
+            ] );
+        } catch ( \GuzzleHttp\Exception\ServerException $exception ) {
+            throw new BaseServerException( $exception->getMessage(), $exception->getCode(), $exception, [
+                'ticker'   => $ticker,
+                'quantity' => 'ALL SHARES',
+            ] );
+        } catch ( \Exception $exception ) {
+            throw $exception;
+        }
+    }
+
+
+    /**
+     * @param string $accountId
+     * @param string $ticker
+     * @param int $quantity
+     * @param float $price
+     * @return bool
+     * @throws BaseClientException
+     * @throws BaseServerException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function sellStockSharesLimitPrice( string $accountId, string $ticker, int $quantity, float $price ): bool {
+        return $this->placeOrder( $accountId,
+                                  $ticker,
+                                  $quantity,
+                                  'SHARES',
+                                  'LIMIT',
+                                  'SELL',
+                                  $price );
+    }
+
+
+    /**
+     * @param string $accountId
+     * @param string $ticker
+     * @param float $price
+     * @return bool
+     * @throws BaseClientException
+     * @throws BaseServerException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @TODO this does not work right. 'ALL_SHARES' is passed but TDA still wants a quantity.
+     */
+    public function sellStockAllSharesLimitPrice( string $accountId, string $ticker, float $price ): bool {
+        $uri        = 'v1/accounts/' . $accountId . '/orders';
+        $orderArray = [
+            'orderType'          => 'LIMIT',
+            'session'            => 'NORMAL',
+            'duration'           => 'DAY',
+            'orderStrategyType'  => 'SINGLE',
+            'price'              => $price,
+            'orderLegCollection' => [ [
+                                          'orderLegType' => 'EQUITY',
+                                          'instruction'  => 'SELL',
                                           'quantityType' => 'ALL_SHARES',
                                           'instrument'   => [
                                               'symbol'    => $ticker,

@@ -2,8 +2,11 @@
 
 namespace MichaelDrennen\TDAmeritrade\Tests;
 
+use Carbon\Carbon;
 use MichaelDrennen\TDAmeritradeAPI\Authenticator;
 use MichaelDrennen\TDAmeritradeAPI\Responses\AccountsAndTrading\SecuritiesAccount;
+use MichaelDrennen\TDAmeritradeAPI\Responses\AccountsAndTrading\SecuritiesAccounts;
+use MichaelDrennen\TDAmeritradeAPI\Responses\Quotes\Quote;
 use MichaelDrennen\TDAmeritradeAPI\TDAmeritradeAPI;
 use PHPUnit\Framework\TestCase;
 
@@ -29,19 +32,19 @@ class TDAmeritradeTest extends TestCase {
         $question_4       = getenv( 'TDAMERITRADE_QUESTION_4' );
         $answer_4         = getenv( 'TDAMERITRADE_ANSWER_4' );
 
-        $authenticator   = new Authenticator( $oauthConsumerKey,
-                                              $userName,
-                                              $password,
-                                              $callbackUrl,
-                                              $question_1,
-                                              $answer_1,
-                                              $question_2,
-                                              $answer_2,
-                                              $question_3,
-                                              $answer_3,
-                                              $question_4,
-                                              $answer_4,
-                                              $refreshToken );
+        $authenticator = new Authenticator( $oauthConsumerKey,
+                                            $userName,
+                                            $password,
+                                            $callbackUrl,
+                                            $question_1,
+                                            $answer_1,
+                                            $question_2,
+                                            $answer_2,
+                                            $question_3,
+                                            $answer_3,
+                                            $question_4,
+                                            $answer_4,
+                                            $refreshToken );
 //        $tdAmeritradeApi = $authenticator->authenticate();
         $tdAmeritradeApi = $authenticator->authenticate_v2();
 
@@ -71,11 +74,11 @@ class TDAmeritradeTest extends TestCase {
         $tdAmeritrade = $this->getTDAmeritradeAPIInstance( $refreshToken );
 
 
-//        $securitiesAccounts = $tdAmeritrade->getAccounts();
-//        $this->assertInstanceOf( SecuritiesAccounts::class, $securitiesAccounts );
+        $securitiesAccounts = $tdAmeritrade->getAccounts();
+        $this->assertInstanceOf( SecuritiesAccounts::class, $securitiesAccounts );
 //
-//        $securitiesAccount = $tdAmeritrade->getAccount( $accountId );
-//        $this->assertInstanceOf( SecuritiesAccount::class, $securitiesAccount );
+        $securitiesAccount = $tdAmeritrade->getAccount( $accountId );
+        $this->assertInstanceOf( SecuritiesAccount::class, $securitiesAccount );
 
 //        print_r( $securitiesAccount );
 
@@ -85,15 +88,23 @@ class TDAmeritradeTest extends TestCase {
 //        $tdAmeritrade->sellStockAllSharesMarketPrice( $accountId, 'LODE' );
         //$tdAmeritrade->createSavedBuyMarketOrder( $accountId, 'LODE', 1 );
 
-//        $quote = $tdAmeritrade->getStockQuote( 'WGP' );
-//        print_r( $quote );
-//        $this->assertInstanceOf( Quote::class, $quote );
+        $quote = $tdAmeritrade->getStockQuote( 'U' );
+        print_r( $quote );
+        $this->assertInstanceOf( Quote::class, $quote );
 //
 //
 //        //$date        = Carbon::create( 2019, 11, 14, 12, 0, 0, 'America/New_York' );
-//        $date        = Carbon::now( 'America/New_York' )->addMonth()->setHour(20);
-//        $marketHours = $tdAmeritrade->getEquityMarketHours( $date );
-//        print_r( $marketHours );
+        $date        = Carbon::now( 'America/New_York' )->addMonth()->setHour( 20 );
+        $marketHours = $tdAmeritrade->getEquityMarketHours( $date );
+        print_r( $marketHours );
+
+
+        //$result = $tdAmeritrade->sellStockSharesLimitPrice( $accountId, 'U', 1, 400.25 );
+        //var_dump( $result );
+
+//        $result = $tdAmeritrade->sellStockAllSharesLimitPrice( $accountId, 'U', 400.25 );
+//        var_dump( $result );
+
     }
 
 }
