@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use MichaelDrennen\TDAmeritradeAPI\Authenticator;
 use MichaelDrennen\TDAmeritradeAPI\Responses\AccountsAndTrading\SecuritiesAccount;
 use MichaelDrennen\TDAmeritradeAPI\Responses\AccountsAndTrading\SecuritiesAccounts;
+use MichaelDrennen\TDAmeritradeAPI\Responses\MarketHours\MarketHours;
 use MichaelDrennen\TDAmeritradeAPI\Responses\Quotes\Quote;
 use MichaelDrennen\TDAmeritradeAPI\TDAmeritradeAPI;
 use PHPUnit\Framework\TestCase;
@@ -32,6 +33,10 @@ class TDAmeritradeTest extends TestCase {
         $question_4       = getenv( 'TDAMERITRADE_QUESTION_4' );
         $answer_4         = getenv( 'TDAMERITRADE_ANSWER_4' );
 
+        $refreshTokenExpiresInSeconds = 60 * 60 * 24;
+
+        $chromePath       = getenv( 'CHROME_PATH' );
+
         $authenticator = new Authenticator( $oauthConsumerKey,
                                             $userName,
                                             $password,
@@ -44,7 +49,9 @@ class TDAmeritradeTest extends TestCase {
                                             $answer_3,
                                             $question_4,
                                             $answer_4,
-                                            $refreshToken );
+                                            $refreshToken,
+                                            $refreshTokenExpiresInSeconds,
+                                            $chromePath );
 //        $tdAmeritradeApi = $authenticator->authenticate();
         $tdAmeritradeApi = $authenticator->authenticate_v2();
 
@@ -89,14 +96,15 @@ class TDAmeritradeTest extends TestCase {
         //$tdAmeritrade->createSavedBuyMarketOrder( $accountId, 'LODE', 1 );
 
         $quote = $tdAmeritrade->getStockQuote( 'U' );
-        print_r( $quote );
+        //print_r( $quote );
         $this->assertInstanceOf( Quote::class, $quote );
 //
 //
 //        //$date        = Carbon::create( 2019, 11, 14, 12, 0, 0, 'America/New_York' );
         $date        = Carbon::now( 'America/New_York' )->addMonth()->setHour( 20 );
         $marketHours = $tdAmeritrade->getEquityMarketHours( $date );
-        print_r( $marketHours );
+        //print_r( $marketHours );
+        $this->assertInstanceOf( MarketHours::class, $marketHours );
 
 
         //$result = $tdAmeritrade->sellStockSharesLimitPrice( $accountId, 'U', 1, 400.25 );

@@ -55,6 +55,9 @@ class Authenticator {
     public $loadedFromRefreshToken = FALSE;
 
 
+    public $chromePath;
+
+
     const REFRESH_TOKEN_MAX_SECONDS_BEFORE_REFRESH = 86400 * 30;
 
     public function __construct( string $oauthConsumerKey,
@@ -70,7 +73,8 @@ class Authenticator {
                                  string $question4,
                                  string $answer4,
                                  string $refreshToken = NULL,
-                                 int $refreshTokenExpiresInSeconds = NULL
+                                 int $refreshTokenExpiresInSeconds = NULL,
+                                 string $chromePath = NULL
     ) {
 
         $this->oauthConsumerKey = $oauthConsumerKey;
@@ -85,6 +89,8 @@ class Authenticator {
 
         $this->refreshToken                 = $refreshToken;
         $this->refreshTokenExpiresInSeconds = $refreshTokenExpiresInSeconds; // In seconds EST
+
+        $this->chromePath = $chromePath;
     }
 
     public function authenticate_v2( bool $debug = FALSE ): TDAmeritradeAPI {
@@ -110,13 +116,13 @@ class Authenticator {
 
 
         $loginUrl       = $this->getLoginUrl( $this->callbackUrl, $this->oauthConsumerKey );
-        $browserFactory = new BrowserFactory();
+        $browserFactory = new BrowserFactory($this->chromePath);
 
         // starts headless chrome
         $browser = $browserFactory->createBrowser( [
                                                        'headless'        => TRUE,         // disable headless mode
                                                        'connectionDelay' => 0.8,           // add 0.8 second of delay between each instruction sent to chrome,
-                                                       //'debugLogger'     => 'php://stdout', // will enable verbose mode
+                                                      // 'debugLogger'     => 'php://stdout', // will enable verbose mode
                                                        'windowSize'      => [ 500, 440 ],
                                                        'enableImages'    => FALSE,
                                                    ] );
@@ -125,12 +131,21 @@ class Authenticator {
         $page = $browser->createPage();
         $page->navigate( $loginUrl )->waitForNavigation();
 
+        // DEBUG
+        //$page->screenshot()->saveToFile(time() . '_' . microtime() . '_first_page.jpg');
+
         $page->evaluate( "document.querySelector('#username0').value = '" . $this->userName . "';" );
         $page->evaluate( "document.querySelector('#password').value = '" . $this->password . "';" );
 
         // Enables the login button.
+//        $page->mouse()
+//             ->move( 340, 450 )
+//             ->click();
+
+        // The format of this page changed, so the link that needs to be clicked moved.
+        // 2021-01-15:mdd FIXED
         $page->mouse()
-             ->move( 340, 450 )
+             ->move( 200, 400 )
              ->click();
 
 // @DEBUG
@@ -149,6 +164,9 @@ class Authenticator {
         $evaluation = $page->evaluate( "document.querySelector('#authform').submit();" );
         $evaluation->waitForPageReload();
 
+        // DEBUG
+        //$page->screenshot()->saveToFile(time() . '_' . microtime() . '_just_clicked_submit.jpg');
+
         $postLoginPageInnerHTML = $page->evaluate( 'document.body.innerHTML' )->getReturnValue();
 
 //        file_put_contents('deleteme.html',$postLoginPageInnerHTML);
@@ -157,11 +175,17 @@ class Authenticator {
 
         if ( $this->textChallengePresented( $postLoginPageInnerHTML ) ):
 //            die('processing text challange');
+            // DEBUG
+            // @NOTE You will want this screen shot to see where the new link is.
+            // It has moved in the past, as you can see in a note above.
+            //$page->screenshot()->saveToFile(time() . '_' . microtime() . '_text_chall_presented.jpg');
             $code = $this->processTextChallenge( $page );
         else:
-            die('doing the other thing');
+            //die('doing the other thing');
             $page->evaluate( 'console.log("Text challenge NOT presented")' );
 
+            // DEBUG
+            //$page->screenshot()->saveToFile( time() . '_' . microtime() . '_text_chall_not_presented.jpg');
             $code = $this->clickTheAllowButtonAndReturnTheCode( $page );
         endif;
 
@@ -203,7 +227,7 @@ class Authenticator {
 
 
         $loginUrl       = $this->getLoginUrl( $this->callbackUrl, $this->oauthConsumerKey );
-        $browserFactory = new BrowserFactory();
+        $browserFactory = new BrowserFactory($this->chromePath);
 
         // starts headless chrome
         $browser = $browserFactory->createBrowser( [
@@ -326,7 +350,7 @@ class Authenticator {
 
         $htmlFromChallengePage = $page->evaluate( 'document.body.innerHTML' )->getReturnValue();
 
-        $answer                = $this->getChallengeAnswerFromLoginPageHTML( $htmlFromChallengePage );
+        $answer = $this->getChallengeAnswerFromLoginPageHTML( $htmlFromChallengePage );
         $page->evaluate( "document.querySelector('#secretquestion0').value = '" . $answer . "';" );
         $page->evaluate( "document.querySelector('#accept').disabled = false;" );
 
@@ -352,8 +376,6 @@ class Authenticator {
 //                                         ] );
 //        $screenshot->saveToFile( 'deleteme.jpg' );
 //        die('asdfasdfad');
-
-
 
 
             $page->evaluate( 'console.log("We have made it to the ALLOW page.")' );

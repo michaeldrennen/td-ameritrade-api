@@ -4,10 +4,10 @@
   "type": "library",
   "require": {
     "ext-json": "*",
-    "guzzlehttp/guzzle": "^6.4|^7.0",
+    "guzzlehttp/guzzle": "^6.4||^7.0",
     "symfony/dom-crawler": "^5.1",
     "symfony/css-selector": "^5.1",
-    "chrome-php/chrome": "^0.8",
+    "chrome-php/chrome": "^0.8||^0.9",
     "nesbot/carbon": "^2.0",
     "michaeldrennen/calendar": "^0.04"
   },
