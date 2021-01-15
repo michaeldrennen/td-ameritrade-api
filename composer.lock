@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "dc38d6c82701aafb72a744a7e8cc81cc",
+    "content-hash": "d2fc1baa8a604b1ff51db5f0aec3ea4d",
     "packages": [
         {
             "name": "apix/log",
@@ -412,24 +412,62 @@
             "time": "2020-09-30T07:37:11+00:00"
         },
         {
-            "name": "michaeldrennen/calendar",
-            "version": "v0.04",
+            "name": "michaeldrennen/business-calendar",
+            "version": "v0.0.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/michaeldrennen/Calendar.git",
-                "reference": "79d28bd4d10f9a1e853d650436a6cd2824a2c50f"
+                "url": "https://github.com/michaeldrennen/BusinessCalendar.git",
+                "reference": "81f05d0b986b2e749ec3274e2b47da75ef4174ad"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/michaeldrennen/Calendar/zipball/79d28bd4d10f9a1e853d650436a6cd2824a2c50f",
-                "reference": "79d28bd4d10f9a1e853d650436a6cd2824a2c50f",
+                "url": "https://api.github.com/repos/michaeldrennen/BusinessCalendar/zipball/81f05d0b986b2e749ec3274e2b47da75ef4174ad",
+                "reference": "81f05d0b986b2e749ec3274e2b47da75ef4174ad",
+                "shasum": ""
+            },
+            "require": {
+                "nesbot/carbon": "^2.43"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9.5"
+            },
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Michael Drennen",
+                    "email": "michaeldrennen74@gmail.com"
+                }
+            ],
+            "description": "A library that should help you with business related date tasks.",
+            "support": {
+                "issues": "https://github.com/michaeldrennen/BusinessCalendar/issues",
+                "source": "https://github.com/michaeldrennen/BusinessCalendar/tree/v0.0.1"
+            },
+            "time": "2021-01-15T22:38:13+00:00"
+        },
+        {
+            "name": "michaeldrennen/calendar",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/michaeldrennen/Calendar.git",
+                "reference": "33afa866082dd6f1ca51667335da661a9701d8bc"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/michaeldrennen/Calendar/zipball/33afa866082dd6f1ca51667335da661a9701d8bc",
+                "reference": "33afa866082dd6f1ca51667335da661a9701d8bc",
                 "shasum": ""
             },
             "require": {
                 "nesbot/carbon": "^2.23"
             },
             "require-dev": {
-                "phpunit/phpunit": "^8.3"
+                "phpunit/phpunit": "^8.3||^9.0"
             },
             "type": "library",
             "autoload": {
@@ -450,9 +488,9 @@
             "description": "A PHP library to help querying dates.",
             "support": {
                 "issues": "https://github.com/michaeldrennen/Calendar/issues",
-                "source": "https://github.com/michaeldrennen/Calendar/tree/v0.04"
+                "source": "https://github.com/michaeldrennen/Calendar/tree/v1.0.0"
             },
-            "time": "2019-09-03T06:12:59+00:00"
+            "time": "2021-01-15T23:19:11+00:00"
         },
         {
             "name": "nesbot/carbon",
