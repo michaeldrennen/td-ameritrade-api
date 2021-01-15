@@ -2,19 +2,26 @@
 
 namespace MichaelDrennen\TDAmeritradeAPI;
 
-use Carbon\Carbon;
 use HeadlessChromium\BrowserFactory;
 use HeadlessChromium\Exception\NavigationExpired;
 use HeadlessChromium\Exception\OperationTimedOut;
 use HeadlessChromium\Page;
 use Exception;
 
+
+/**
+ * Class Authenticator
+ * @package MichaelDrennen\TDAmeritradeAPI
+ */
 class Authenticator {
 
     use APIClientTrait;
 
     const AUTH_URI = 'https://auth.tdameritrade.com/';
 
+    /**
+     * @var bool
+     */
     protected $debug = FALSE;
 
     /**
