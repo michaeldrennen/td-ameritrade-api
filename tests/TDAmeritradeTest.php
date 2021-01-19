@@ -33,9 +33,10 @@ class TDAmeritradeTest extends TestCase {
         $question_4       = getenv( 'TDAMERITRADE_QUESTION_4' );
         $answer_4         = getenv( 'TDAMERITRADE_ANSWER_4' );
 
-        $refreshTokenExpiresInSeconds = 60 * 60 * 24;
+        //$refreshTokenExpiresInSeconds = 60 * 60 * 24
+        $refreshTokenExpiresInSeconds = NULL;
 
-        $chromePath       = getenv( 'CHROME_PATH' );
+        $chromePath = getenv( 'CHROME_PATH' );
 
         $authenticator = new Authenticator( $oauthConsumerKey,
                                             $userName,

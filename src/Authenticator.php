@@ -108,7 +108,8 @@ class Authenticator {
                 $accessToken                  = $tokens[ 'access_token' ];
                 $refreshTokenExpiresInSeconds = $tokens[ 'refresh_token_expires_in' ];
                 $this->loadedFromRefreshToken = TRUE;
-                $this->resetRefreshTokenIfItWillExpireSoon( $this->refreshToken, $refreshTokenExpiresInSeconds );
+                $this->resetRefreshTokenIfItWillExpireSoon( $this->refreshToken,
+                                                            $refreshTokenExpiresInSeconds );
 
                 return new TDAmeritradeAPI( $this->userName,
                                             $accessToken,
@@ -129,7 +130,7 @@ class Authenticator {
         $browser = $browserFactory->createBrowser( [
                                                        'headless'        => TRUE,         // disable headless mode
                                                        'connectionDelay' => 0.8,           // add 0.8 second of delay between each instruction sent to chrome,
-                                                      // 'debugLogger'     => 'php://stdout', // will enable verbose mode
+                                                       //'debugLogger'     => 'php://stdout', // will enable verbose mode
                                                        'windowSize'      => [ 500, 440 ],
                                                        'enableImages'    => FALSE,
                                                    ] );
@@ -139,10 +140,18 @@ class Authenticator {
         $page->navigate( $loginUrl )->waitForNavigation();
 
         // DEBUG
-        //$page->screenshot()->saveToFile(time() . '_' . microtime() . '_first_page.jpg');
+        if($this->debug):
+            $page->screenshot()->saveToFile(time() . '_' . microtime() . '_first_page.jpg');
+        endif;
+
 
         $page->evaluate( "document.querySelector('#username0').value = '" . $this->userName . "';" );
-        $page->evaluate( "document.querySelector('#password').value = '" . $this->password . "';" );
+        $page->evaluate( "document.querySelector('#password1').value = '" . $this->password . "';" );
+
+        // DEBUG
+        if($this->debug):
+            $page->screenshot()->saveToFile(time() . '_' . microtime() . '_filled_in_user_pass.jpg');
+        endif;
 
         // Enables the login button.
 //        $page->mouse()
@@ -155,14 +164,11 @@ class Authenticator {
              ->move( 200, 400 )
              ->click();
 
-// @DEBUG
-//        $screenshot = $page->screenshot( [
-//                                             'format'  => 'jpeg',  // default to 'png' - possible values: 'png', 'jpeg',
-//                                             'quality' => 80       // only if format is 'jpeg' - default 100
-//                                         ] );
-//        $screenshot->saveToFile( 'deleteme.jpg' );
-//        die( $loginUrl );
-// @ENDDEBUG
+
+        if($this->debug):
+            $page->screenshot()->saveToFile(time() . '_' . microtime() . '_something_was_clicked.jpg');
+        endif;
+
 
 //        $page->mouse()
 //             ->move( 193, 632 )
@@ -172,7 +178,9 @@ class Authenticator {
         $evaluation->waitForPageReload();
 
         // DEBUG
-        //$page->screenshot()->saveToFile(time() . '_' . microtime() . '_just_clicked_submit.jpg');
+        if($this->debug):
+            $page->screenshot()->saveToFile(time() . '_' . microtime() . '_just_clicked_submit.jpg');
+        endif;
 
         $postLoginPageInnerHTML = $page->evaluate( 'document.body.innerHTML' )->getReturnValue();
 
@@ -181,18 +189,23 @@ class Authenticator {
 
 
         if ( $this->textChallengePresented( $postLoginPageInnerHTML ) ):
-//            die('processing text challange');
             // DEBUG
             // @NOTE You will want this screen shot to see where the new link is.
             // It has moved in the past, as you can see in a note above.
-            //$page->screenshot()->saveToFile(time() . '_' . microtime() . '_text_chall_presented.jpg');
+            if($this->debug):
+                $page->screenshot()->saveToFile(time() . '_' . microtime() . '_text_chall_presented.jpg');
+            endif;
+
             $code = $this->processTextChallenge( $page );
         else:
             //die('doing the other thing');
             $page->evaluate( 'console.log("Text challenge NOT presented")' );
 
             // DEBUG
-            //$page->screenshot()->saveToFile( time() . '_' . microtime() . '_text_chall_not_presented.jpg');
+            if($this->debug):
+                $page->screenshot()->saveToFile( time() . '_' . microtime() . '_text_chall_not_presented.jpg');
+            endif;
+
             $code = $this->clickTheAllowButtonAndReturnTheCode( $page );
         endif;
 
@@ -278,7 +291,8 @@ class Authenticator {
                                     $debug );
     }
 
-    protected function resetRefreshTokenIfItWillExpireSoon( string $refreshToken, int $refreshTokenExpiresInSeconds ): void {
+    protected function resetRefreshTokenIfItWillExpireSoon( string $refreshToken,
+                                                            int $refreshTokenExpiresInSeconds ): void {
         $now          = time();
         $deadline     = $now + $refreshTokenExpiresInSeconds;
         $refreshAfter = $deadline - self::REFRESH_TOKEN_MAX_SECONDS_BEFORE_REFRESH;
@@ -446,11 +460,11 @@ class Authenticator {
             $page->evaluate( 'console.log("We have made it to the ALLOW page.")' );
         } catch ( OperationTimedOut $e ) {
             // too long to load
-            var_dump( $e->getMessage() );
+            var_dump( "OperationTimedOut: " . $e->getMessage() );
             throw $e;
         } catch ( NavigationExpired $e ) {
             // An other page was loaded
-            var_dump( $e->getMessage() );
+            var_dump( "NavigationExpired: " . $e->getMessage() );
             throw $e;
         }
 
