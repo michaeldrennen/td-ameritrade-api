@@ -7,6 +7,9 @@ use GuzzleHttp\RequestOptions;
 use MichaelDrennen\TDAmeritradeAPI\Exceptions\BaseClientException;
 use MichaelDrennen\TDAmeritradeAPI\Exceptions\BaseServerException;
 use MichaelDrennen\TDAmeritradeAPI\Exceptions\ClientExceptionFactory;
+use MichaelDrennen\TDAmeritradeAPI\Responses\AccountsAndTrading\Order;
+use MichaelDrennen\TDAmeritradeAPI\Responses\AccountsAndTrading\Orders;
+use MichaelDrennen\TDAmeritradeAPI\Responses\AccountsAndTrading\Position;
 use MichaelDrennen\TDAmeritradeAPI\Responses\AccountsAndTrading\SecuritiesAccount;
 use MichaelDrennen\TDAmeritradeAPI\Responses\AccountsAndTrading\SecuritiesAccounts;
 
@@ -249,6 +252,60 @@ class TDAmeritradeAPI {
 
     /**
      * @param string $accountId
+     * @param int|null $maxResults
+     * @param string|null $fromEnteredTime Ex: 2020-01-01
+     * @param string|null $toEnteredTime Ex: 2020-12-31
+     * @throws BaseClientException
+     * @throws BaseServerException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function getOrdersByQuery( string $accountId,
+                                      int $maxResults = NULL,
+                                      string $fromEnteredTime = NULL,
+                                      string $toEnteredTime = NULL ) {
+        $uri     = 'v1/orders';
+        $options = [
+            'query' => [
+                'accountId' => $accountId,
+            ],
+        ];
+
+        if ( $maxResults ):
+            $options[ 'query' ][ 'maxResults' ] = $maxResults;
+        endif;
+
+        if ( $fromEnteredTime ):
+            $options[ 'query' ][ 'fromEnteredTime' ] = $fromEnteredTime;
+        endif;
+
+        if ( $toEnteredTime ):
+            $options[ 'query' ][ 'toEnteredTime' ] = $toEnteredTime;
+        endif;
+
+
+        try {
+            $response = $this->guzzle->request( 'GET', $uri, $options );
+            $body     = $response->getBody();
+            $json     = json_decode( $body, TRUE );
+            return new Orders( $json );
+        } catch
+        ( \GuzzleHttp\Exception\ClientException $exception ) {
+            throw ClientExceptionFactory::create( $exception, [
+
+            ] );
+        } catch ( \GuzzleHttp\Exception\ServerException $exception ) {
+            throw new BaseServerException( $exception->getMessage(), $exception->getCode(), $exception, [
+
+            ] );
+        } catch ( \Exception $exception ) {
+            throw $exception;
+        }
+
+    }
+
+
+    /**
+     * @param string $accountId
      * @param string $ticker
      * @param int $quantity
      * @return boolean
@@ -342,6 +399,42 @@ class TDAmeritradeAPI {
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function sellStockSharesLimitPrice( string $accountId, string $ticker, int $quantity, float $price ): bool {
+
+        // Orders above $1 can be entered in no more than 2 decimals; orders below $1 can be entered in no more than 4 decimals.
+        // This is an error that is returned by TDA.
+        if ( 1 > $price ):
+            $price = round( $price, 4 );
+        elseif ( 1 < $price ):
+            $price = round( $price, 2 );
+        endif;
+
+        return $this->placeOrder( $accountId,
+                                  $ticker,
+                                  $quantity,
+                                  'SHARES',
+                                  'LIMIT',
+                                  'SELL',
+                                  $price );
+    }
+
+
+    /**
+     * @param string $accountId
+     * @param string $ticker
+     * @param int $quantity
+     * @param float $price
+     * @return bool
+     * @throws BaseClientException
+     * @throws BaseServerException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     *
+     * @url https://developer.tdameritrade.com/content/place-order-samples
+     * Search for "Conditional Order: One Triggers Another"
+     */
+    public function placeFirstTriggerSequenceOrder( string $accountId,
+                                                    string $ticker,
+                                                    int $quantity,
+                                                    float $exitAfterThisPercentIncrease ): bool {
         return $this->placeOrder( $accountId,
                                   $ticker,
                                   $quantity,
@@ -382,7 +475,7 @@ class TDAmeritradeAPI {
         ];
 
         try {
-            $this->guzzle->request( 'POST', $uri, [ RequestOptions::JSON => $orderArray ] );
+            $this->guzzle->request( 'POST', $uri, [ RequestOptions::JSON => $orderArray, 'debug' => TRUE ] );
             return TRUE;
         } catch ( \GuzzleHttp\Exception\ClientException $exception ) {
             throw ClientExceptionFactory::create( $exception, [
@@ -397,6 +490,57 @@ class TDAmeritradeAPI {
         } catch ( \Exception $exception ) {
             throw $exception;
         }
+    }
+
+
+    /**
+     * @param string $accountId
+     * @param float $minPercentProfit
+     * @return array[]
+     * @throws BaseClientException
+     * @throws BaseServerException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function placeSellLimitOrdersOverPercentProfitOnAllPositions( string $accountId,
+                                                                         float $minPercentProfit ): array {
+        $orders  = [
+            'placed'    => [],
+            'notPlaced' => [],
+        ];
+        $account = $this->getAccount( $accountId );
+        /**
+         * @var Position $position
+         */
+        foreach ( $account->positions as $position ):
+            $ticker     = $position->instrument[ 'symbol' ];
+            $limitPrice = $position->averagePrice * ( 1 + $minPercentProfit );
+            $quantity   = $position->longQuantity;
+
+            var_dump('NEXTTT');
+            var_dump($ticker);
+            var_dump($limitPrice);
+            var_dump($quantity);
+            $placed     = $this->sellStockSharesLimitPrice( $accountId,
+                                                            $ticker,
+                                                            $quantity,
+                                                            $limitPrice );
+            if ( $placed ):
+                $orders[ 'placed' ][] = [
+                    'accountId'  => $accountId,
+                    'ticker'     => $ticker,
+                    'quantity'   => $quantity,
+                    'limitPrice' => $limitPrice,
+                ];
+            else:
+                $orders[ 'notPlaced' ][] = [
+                    'accountId'  => $accountId,
+                    'ticker'     => $ticker,
+                    'quantity'   => $quantity,
+                    'limitPrice' => $limitPrice,
+                ];
+            endif;
+        endforeach;
+        return $orders;
     }
 
 }
