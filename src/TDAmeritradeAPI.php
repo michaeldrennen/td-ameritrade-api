@@ -502,7 +502,8 @@ class TDAmeritradeAPI {
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function placeSellLimitOrdersOverPercentProfitOnAllPositions( string $accountId,
-                                                                         float $minPercentProfit ): array {
+                                                                         float $minPercentProfit,
+                                                                         array $tickersToSkip = [] ): array {
         $orders  = [
             'placed'    => [],
             'notPlaced' => [],
@@ -512,14 +513,19 @@ class TDAmeritradeAPI {
          * @var Position $position
          */
         foreach ( $account->positions as $position ):
-            $ticker     = $position->instrument[ 'symbol' ];
+            $ticker = $position->instrument[ 'symbol' ];
+
+            if ( in_array( $ticker, $tickersToSkip ) ):
+                continue;
+            endif;
+
             $limitPrice = $position->averagePrice * ( 1 + $minPercentProfit );
             $quantity   = $position->longQuantity;
 
-            $placed     = $this->sellStockSharesLimitPrice( $accountId,
-                                                            $ticker,
-                                                            $quantity,
-                                                            $limitPrice );
+            $placed = $this->sellStockSharesLimitPrice( $accountId,
+                                                        $ticker,
+                                                        $quantity,
+                                                        $limitPrice );
             if ( $placed ):
                 $orders[ 'placed' ][] = [
                     'accountId'  => $accountId,
