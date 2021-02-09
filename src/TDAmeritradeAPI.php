@@ -516,10 +516,6 @@ class TDAmeritradeAPI {
             $limitPrice = $position->averagePrice * ( 1 + $minPercentProfit );
             $quantity   = $position->longQuantity;
 
-            var_dump('NEXTTT');
-            var_dump($ticker);
-            var_dump($limitPrice);
-            var_dump($quantity);
             $placed     = $this->sellStockSharesLimitPrice( $accountId,
                                                             $ticker,
                                                             $quantity,
