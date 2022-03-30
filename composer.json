@@ -7,7 +7,7 @@
     "guzzlehttp/guzzle": "^6||^7",
     "symfony/dom-crawler": "^5||^6",
     "symfony/css-selector": "^5||^6",
-    "chrome-php/chrome": "^0.8||^0.9",
+    "chrome-php/chrome": "^0||^1",
     "nesbot/carbon": "^2",
     "michaeldrennen/calendar": "^1",
     "michaeldrennen/business-calendar": "^0"
