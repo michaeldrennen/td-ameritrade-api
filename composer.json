@@ -3,6 +3,7 @@
   "description": "A PHP library used to interact with the TD Ameritrade API.",
   "type": "library",
   "require": {
+    "php": "^8.1",
     "ext-json": "*",
     "guzzlehttp/guzzle": "^6|^7",
     "symfony/dom-crawler": "^5|^6",
