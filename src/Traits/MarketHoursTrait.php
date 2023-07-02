@@ -44,11 +44,19 @@ trait MarketHoursTrait {
         $json     = json_decode( $body, TRUE );
 
         if ( isset( $json[ 'equity' ][ 'EQ' ] ) ):
-            return new MarketHours( $json[ 'equity' ][ 'EQ' ] );
+            $marketHours = new MarketHours( $json[ 'equity' ][ 'EQ' ] );
         elseif ( isset( $json[ 'equity' ][ 'equity' ] ) ):
-            return new MarketHours( $json[ 'equity' ][ 'equity' ] );
+            $marketHours = new MarketHours( $json[ 'equity' ][ 'equity' ] );
+        else:
+            throw new \Exception( "Take a look at the JSON returned from their API. I'm seeing a new index in the array." );
         endif;
-        throw new \Exception( "Take a look at the JSON returned from their API. I'm seeing a new index in the array." );
+
+        // If the market is closed, then return the next hours.
+        if( !empty($marketHours->sessionHours)):
+            return $marketHours;
+        else:
+            return $this->getNextMarketHours();
+        endif;
     }
 
     public function getNextMarketHours(): MarketHours {
