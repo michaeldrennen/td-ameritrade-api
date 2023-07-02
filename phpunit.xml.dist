@@ -21,6 +21,8 @@
         </whitelist>
     </filter>
     <php>
+        <!-- TO MAKE CHROMIUM RUN from homebrew install you need to remove the quarantine property.
+         xattr -dr com.apple.quarantine /Applications/Chromium.app -->
         <env name="CHROME_PATH" value="/Applications/Chromium.app/Contents/MacOS/Chromium"/>
         <env name="TDAMERITRADE_CALLBACK_URL" value="https://your-project.com/callback"/>
         <env name="TDAMERITRADE_OAUTH_CONSUMER_KEY" value="SOMEKEYFROMTDAMERITRADE"/>

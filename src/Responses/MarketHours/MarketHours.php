@@ -71,17 +71,17 @@ class MarketHours {
         $this->sessionHours = [];
         if ( isset( $sessionHours[ 'preMarket' ][ 0 ] ) ):
             $this->sessionHours[ 'preMarket' ][ 'start' ] = Carbon::parse( $sessionHours[ 'preMarket' ][ 0 ][ 'start' ] );
-            $this->sessionHours[ 'preMarket' ][ 'end' ]   = Carbon::parse( $sessionHours[ 'preMarket' ][ 0 ][ 'start' ] );
+            $this->sessionHours[ 'preMarket' ][ 'end' ]   = Carbon::parse( $sessionHours[ 'preMarket' ][ 0 ][ 'end' ] );
         endif;
 
         if ( isset( $sessionHours[ 'regularMarket' ][ 0 ] ) ):
             $this->sessionHours[ 'regularMarket' ][ 'start' ] = Carbon::parse( $sessionHours[ 'regularMarket' ][ 0 ][ 'start' ] );
-            $this->sessionHours[ 'regularMarket' ][ 'end' ]   = Carbon::parse( $sessionHours[ 'regularMarket' ][ 0 ][ 'start' ] );
+            $this->sessionHours[ 'regularMarket' ][ 'end' ]   = Carbon::parse( $sessionHours[ 'regularMarket' ][ 0 ][ 'end' ] );
         endif;
 
         if ( isset( $sessionHours[ 'postMarket' ][ 0 ] ) ):
             $this->sessionHours[ 'postMarket' ][ 'start' ] = Carbon::parse( $sessionHours[ 'postMarket' ][ 0 ][ 'start' ] );
-            $this->sessionHours[ 'postMarket' ][ 'end' ]   = Carbon::parse( $sessionHours[ 'postMarket' ][ 0 ][ 'start' ] );
+            $this->sessionHours[ 'postMarket' ][ 'end' ]   = Carbon::parse( $sessionHours[ 'postMarket' ][ 0 ][ 'end' ] );
         endif;
     }
 

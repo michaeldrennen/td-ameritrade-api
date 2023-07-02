@@ -1,8 +1,9 @@
 <?php
 
-namespace MichaelDrennen\TDAmeritrade\Tests;
+namespace MichaelDrennen\TDAmeritradeAPI\Tests;
 
 use Carbon\Carbon;
+use MichaelDrennen\TDAmeritrade\Tests\AbstractParentTest;
 use MichaelDrennen\TDAmeritradeAPI\Responses\AccountsAndTrading\SecuritiesAccount;
 use MichaelDrennen\TDAmeritradeAPI\Responses\AccountsAndTrading\SecuritiesAccounts;
 use MichaelDrennen\TDAmeritradeAPI\Responses\MarketHours\MarketHours;
@@ -35,8 +36,6 @@ class TDAmeritradeTest extends AbstractParentTest {
 //
         $securitiesAccount = $tdAmeritrade->getAccount( $accountId );
         $this->assertInstanceOf( SecuritiesAccount::class, $securitiesAccount );
-
-//        print_r( $securitiesAccount );
 
 
         //$tdAmeritrade->buyStockMarketPrice( $accountId, 'LODE', 1 );

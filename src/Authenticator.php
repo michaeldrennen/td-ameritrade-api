@@ -129,7 +129,7 @@ class Authenticator {
         // starts headless chrome
         $browser = $browserFactory->createBrowser( [
                                                        'headless'        => TRUE,         // disable headless mode
-                                                       'connectionDelay' => 0.8,           // add 0.8 second of delay between each instruction sent to chrome,
+                                                       'connectionDelay' => 1,           // MUST BE INT: add 1 second of delay between each instruction sent to chrome,
                                                        //'debugLogger'     => 'php://stdout', // will enable verbose mode
                                                        'windowSize'      => [ 500, 440 ],
                                                        'enableImages'    => FALSE,
