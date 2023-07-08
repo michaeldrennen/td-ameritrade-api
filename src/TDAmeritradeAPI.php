@@ -41,8 +41,8 @@ class TDAmeritradeAPI {
     public function __construct( string $userName = NULL,
                                  string $accessToken = NULL,
                                  string $refreshToken = NULL,
-                                 int $refreshTokenExpiresInSeconds = NULL,
-                                 bool $debug = FALSE ) {
+                                 int    $refreshTokenExpiresInSeconds = NULL,
+                                 bool   $debug = FALSE ) {
         $this->userName                     = $userName;
         $this->accessToken                  = $accessToken;
         $this->refreshToken                 = $refreshToken;
@@ -202,11 +202,11 @@ class TDAmeritradeAPI {
      */
     public function placeOrder( string $accountId,
                                 string $ticker,
-                                int $quantity,
+                                int    $quantity,
                                 string $quantityType,
                                 string $orderType,
                                 string $instruction,
-                                float $price = NULL ): bool {
+                                float  $price = NULL ): bool {
         $uri        = 'v1/accounts/' . $accountId . '/orders';
         $orderArray = [
             'orderType'          => $orderType,
@@ -260,7 +260,7 @@ class TDAmeritradeAPI {
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getOrdersByQuery( string $accountId,
-                                      int $maxResults = NULL,
+                                      int    $maxResults = NULL,
                                       string $fromEnteredTime = NULL,
                                       string $toEnteredTime = NULL ) {
         $uri     = 'v1/orders';
@@ -433,8 +433,8 @@ class TDAmeritradeAPI {
      */
     public function placeFirstTriggerSequenceOrder( string $accountId,
                                                     string $ticker,
-                                                    int $quantity,
-                                                    float $exitAfterThisPercentIncrease ): bool {
+                                                    int    $quantity,
+                                                    float  $exitAfterThisPercentIncrease ): bool {
         return $this->placeOrder( $accountId,
                                   $ticker,
                                   $quantity,
@@ -502,17 +502,27 @@ class TDAmeritradeAPI {
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function placeSellLimitOrdersOverPercentProfitOnAllPositions( string $accountId,
-                                                                         float $minPercentProfit,
-                                                                         array $tickersToSkip = [] ): array {
+                                                                         float  $minPercentProfit,
+                                                                         array  $tickersToSkip = [] ): array {
         $orders  = [
             'placed'    => [],
             'notPlaced' => [],
         ];
         $account = $this->getAccount( $accountId );
+
+        /**
+         * @var Position[] $positions
+         */
+        $positions = $account->positions;
+
+        if ( empty( $positions ) ):
+            return [];
+        endif;
+
         /**
          * @var Position $position
          */
-        foreach ( $account->positions as $position ):
+        foreach ( $positions as $position ):
             $ticker = $position->instrument[ 'symbol' ];
 
             if ( in_array( $ticker, $tickersToSkip ) ):
