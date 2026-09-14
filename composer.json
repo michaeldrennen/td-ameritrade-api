@@ -9,7 +9,7 @@
     "symfony/dom-crawler": "^5|^6",
     "symfony/css-selector": "^5|^6",
     "chrome-php/chrome": "^0|^1",
-    "nesbot/carbon": "^2",
+    "nesbot/carbon": "^2|^3",
     "michaeldrennen/calendar": "^1",
     "michaeldrennen/business-calendar": "^0"
   },
